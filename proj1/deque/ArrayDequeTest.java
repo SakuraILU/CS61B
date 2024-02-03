@@ -226,4 +226,21 @@ public class ArrayDequeTest {
 
         assertTrue(ad.equals(ld));
     }
+
+    @Test
+    /*
+     * test Total memory usage after inserting N items and then
+     * deleting all but one item, where N is a power of 2
+     */
+    public void testMemoryUsage() {
+        ArrayDeque<Integer> ad = new ArrayDeque<Integer>();
+        int N = 64;
+        for (int i = 0; i < N; i++) {
+            ad.addLast(i);
+        }
+        for (int i = 0; i < N - 1; i++) {
+            ad.removeLast();
+        }
+        assertEquals(16, ad.size());
+    }
 }

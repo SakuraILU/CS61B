@@ -4,11 +4,11 @@ import java.util.Iterator;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class Node {
-        public T value;
-        public Node next;
-        public Node prev;
+        private T value;
+        private Node next;
+        private Node prev;
 
-        public Node(T value, Node next, Node prev) {
+        Node(T value, Node next, Node prev) {
             this.value = value;
             this.next = next;
             this.prev = prev;

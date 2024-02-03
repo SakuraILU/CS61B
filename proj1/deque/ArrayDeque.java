@@ -6,51 +6,51 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private T[] items;
     private int size;
-    private int next_first;
-    private int next_last;
+    private int nextFirst;
+    private int nextLast;
 
     public ArrayDeque() {
         items = (T[]) new Object[8];
         size = 0;
-        next_first = 4;
-        next_last = 5;
+        nextFirst = 4;
+        nextLast = 5;
     }
 
     private void resize(int capacity) {
-        T[] new_items = (T[]) new Object[capacity];
+        T[] newItems = (T[]) new Object[capacity];
 
-        int i = mod(next_first + 1);
+        int i = mod(nextFirst + 1);
         for (int j = 0; j < size(); j++, i = mod(i + 1)) {
-            new_items[j] = items[i];
+            newItems[j] = items[i];
         }
-        items = new_items;
+        items = newItems;
 
-        next_first = mod(-1);
-        next_last = mod(size());
+        nextFirst = mod(-1);
+        nextLast = mod(size());
     }
 
     @Override
     public void addFirst(T item) {
         if (size() == items.length) {
-            resize((int) (1.5 * items.length));
+            resize(2 * items.length);
         }
 
         size++;
 
-        items[mod(next_first)] = item;
-        next_first = mod(next_first - 1);
+        items[mod(nextFirst)] = item;
+        nextFirst = mod(nextFirst - 1);
     }
 
     @Override
     public void addLast(T item) {
         if (size() == items.length) {
-            resize((int) (1.5 * items.length));
+            resize(2 * items.length);
         }
 
         size++;
 
-        items[mod(next_last)] = item;
-        next_last = mod(next_last + 1);
+        items[mod(nextLast)] = item;
+        nextLast = mod(nextLast + 1);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void printDeque() {
-        int i = mod(next_first + 1);
+        int i = mod(nextFirst + 1);
         for (int k = 0; k < size(); k++, i = mod(i + 1)) {
             System.out.printf("%s ", items[i]);
         }
@@ -69,7 +69,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public T removeFirst() {
-        if (size() >= 16 && size() < items.length * 0.25) {
+        if (size() >= 16 && size() <= items.length * 0.25) {
             resize((int) (0.5 * items.length));
         }
 
@@ -79,15 +79,15 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         size--;
 
-        T value = items[mod(next_first + 1)];
-        next_first = mod(next_first + 1);
+        T value = items[mod(nextFirst + 1)];
+        nextFirst = mod(nextFirst + 1);
 
         return value;
     }
 
     @Override
     public T removeLast() {
-        if (size() >= 16 && size() < items.length * 0.25) {
+        if (size() >= 16 && size() <= items.length * 0.25) {
             resize((int) (0.5 * items.length));
         }
 
@@ -97,8 +97,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         size--;
 
-        T value = items[mod(next_last - 1)];
-        next_last = mod(next_last - 1);
+        T value = items[mod(nextLast - 1)];
+        nextLast = mod(nextLast - 1);
 
         return value;
     }
@@ -109,7 +109,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return null;
         }
 
-        index = mod(next_first + 1 + index);
+        index = mod(nextFirst + 1 + index);
 
         return items[index];
     }
@@ -147,11 +147,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         private int index;
 
         AllTIterator() {
-            index = mod(next_first + 1);
+            index = mod(nextFirst + 1);
         }
 
         public boolean hasNext() {
-            return index != next_last;
+            return index != nextLast;
         }
 
         public T next() {

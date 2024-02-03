@@ -27,7 +27,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         return max;
     }
 
-    public T max(Comparator<T> c) {
+    public T max(Comparator<T> custom_c) {
         if (size() == 0) {
             return null;
         }
@@ -36,7 +36,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
         Iterator<T> itr = iterator();
         while (itr.hasNext()) {
             T value = itr.next();
-            if (c.compare(max, value) < 0) {
+            if (custom_c.compare(max, value) < 0) {
                 max = value;
             }
         }
