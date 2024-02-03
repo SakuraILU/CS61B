@@ -2,13 +2,13 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private class Node {
-        public Item value;
+        public T value;
         public Node next;
         public Node prev;
 
-        public Node(Item value, Node next, Node prev) {
+        public Node(T value, Node next, Node prev) {
             this.value = value;
             this.next = next;
             this.prev = prev;
@@ -26,7 +26,7 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
     }
 
     @Override
-    public void addFirst(Item item) {
+    public void addFirst(T item) {
         size++;
 
         Node first = sentinel.next;
@@ -37,7 +37,7 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
     }
 
     @Override
-    public void addLast(Item item) {
+    public void addLast(T item) {
         size++;
 
         Node last = sentinel.prev;
@@ -64,12 +64,12 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
     }
 
     @Override
-    public Item removeFirst() {
+    public T removeFirst() {
         if (isEmpty()) {
             return null;
         }
 
-        Item val = sentinel.next.value;
+        T val = sentinel.next.value;
 
         size--;
 
@@ -81,12 +81,12 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
     }
 
     @Override
-    public Item removeLast() {
+    public T removeLast() {
         if (isEmpty()) {
             return null;
         }
 
-        Item val = sentinel.prev.value;
+        T val = sentinel.prev.value;
 
         size--;
 
@@ -98,7 +98,7 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
     }
 
     @Override
-    public Item get(int index) {
+    public T get(int index) {
         if (index >= size()) {
             return null;
         }
@@ -117,7 +117,7 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
         return null;
     }
 
-    public Item getRecursive(int index) {
+    public T getRecursive(int index) {
         if (index >= size()) {
             return null;
         }
@@ -125,7 +125,7 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
         return getRecursive(sentinel.next, index);
     }
 
-    private Item getRecursive(Node node, int index) {
+    private T getRecursive(Node node, int index) {
         if (index == 0) {
             return node.value;
         }
@@ -144,17 +144,17 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
             return false;
         }
 
-        Deque<Item> other = (Deque<Item>) o;
+        LinkedListDeque<T> other = (LinkedListDeque<T>) o;
 
         if (other.size() != this.size()) {
             return false;
         }
 
-        Iterator<Item> itr_this = iterator();
-        Iterator<Item> itr_other = other.iterator();
+        Iterator<T> itr_this = iterator();
+        Iterator<T> itr_other = other.iterator();
         while (itr_this.hasNext()) {
-            Item value1 = itr_this.next();
-            Item value2 = itr_other.next();
+            T value1 = itr_this.next();
+            T value2 = itr_other.next();
             if (!value1.equals(value2)) {
                 return false;
             }
@@ -163,10 +163,10 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
         return true;
     }
 
-    private class AllItemIterator implements Iterator<Item>, Iterable<Item> {
+    private class AllTIterator implements Iterator<T>, Iterable<T> {
         private Node itr;
 
-        AllItemIterator() {
+        AllTIterator() {
             itr = sentinel.next;
         }
 
@@ -174,22 +174,22 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
             return itr != sentinel;
         }
 
-        public Item next() {
-            Item value = itr.value;
+        public T next() {
+            T value = itr.value;
 
             itr = itr.next;
 
             return value;
         }
 
-        public Iterator<Item> iterator() {
+        public Iterator<T> iterator() {
             return this;
         }
 
     }
 
     @Override
-    public Iterator<Item> iterator() {
-        return new AllItemIterator();
+    public Iterator<T> iterator() {
+        return new AllTIterator();
     }
 }
