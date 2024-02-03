@@ -133,6 +133,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         return getRecursive(node.next, index - 1);
     }
 
+    @SuppressWarnings("unchecked")
     public boolean equals(Object o) {
         if (o == this) {
             return true;

@@ -1,7 +1,5 @@
 package deque;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
@@ -118,6 +116,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return items[index];
     }
 
+    @SuppressWarnings("unchecked")
     public boolean equals(Object o) {
         if (o == this) {
             return true;
