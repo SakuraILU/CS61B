@@ -212,4 +212,18 @@ public class ArrayDequeTest {
         }
         assertTrue(ad1.equals(ad2));
     }
+
+    @Test
+    /* test two different type equal */
+    public void testEqualMultDequeType() {
+        ArrayDeque<Integer> ad = new ArrayDeque<Integer>();
+        LinkedListDeque<Integer> ld = new LinkedListDeque<Integer>();
+
+        for (int i = 0; i < 10000; i++) {
+            ad.addLast(i);
+            ld.addLast(i);
+        }
+
+        assertTrue(ad.equals(ld));
+    }
 }
