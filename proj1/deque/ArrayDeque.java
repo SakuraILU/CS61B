@@ -2,22 +2,22 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
+public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
 
-    private T[] items;
+    private Item[] items;
     private int size;
     private int next_first;
     private int next_last;
 
     public ArrayDeque() {
-        items = (T[]) new Object[8];
+        items = (Item[]) new Object[8];
         size = 0;
         next_first = 4;
         next_last = 5;
     }
 
     private void resize(int capacity) {
-        T[] new_items = (T[]) new Object[capacity];
+        Item[] new_items = (Item[]) new Object[capacity];
 
         int start = mod(next_first + 1);
         int end = mod(next_last);
@@ -31,7 +31,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     @Override
-    public void addFirst(T item) {
+    public void addFirst(Item item) {
         if (size() == items.length - 1) {
             resize(2 * items.length);
         }
@@ -43,7 +43,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     @Override
-    public void addLast(T item) {
+    public void addLast(Item item) {
         if (size() == items.length - 1) {
             resize(2 * items.length);
         }
@@ -70,7 +70,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     @Override
-    public T removeFirst() {
+    public Item removeFirst() {
         if (size() > 16 && size() < items.length * 0.25) {
             resize((int) (0.5 * items.length));
         }
@@ -81,14 +81,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         size--;
 
-        T value = items[mod(next_first + 1)];
+        Item value = items[mod(next_first + 1)];
         next_first = mod(next_first + 1);
 
         return value;
     }
 
     @Override
-    public T removeLast() {
+    public Item removeLast() {
         if (size() > 16 && size() < items.length * 0.25) {
             resize((int) (0.5 * items.length));
         }
@@ -99,14 +99,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         size--;
 
-        T value = items[mod(next_last - 1)];
+        Item value = items[mod(next_last - 1)];
         next_last = mod(next_last - 1);
 
         return value;
     }
 
     @Override
-    public T get(int index) {
+    public Item get(int index) {
         if (index >= size()) {
             return null;
         }
@@ -127,7 +127,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
 
-        Deque<T> other = (Deque<T>) o;
+        Deque<Item> other = (Deque<Item>) o;
 
         if (other.size() != this.size()) {
             return false;
@@ -137,11 +137,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
 
-        Iterator<T> itr_this = iterator();
-        Iterator<T> itr_other = other.iterator();
+        Iterator<Item> itr_this = iterator();
+        Iterator<Item> itr_other = other.iterator();
         while (itr_this.hasNext()) {
-            T value1 = itr_this.next();
-            T value2 = itr_other.next();
+            Item value1 = itr_this.next();
+            Item value2 = itr_other.next();
             if (!value1.equals(value2)) {
                 return false;
             }
@@ -150,10 +150,10 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return true;
     }
 
-    private class AllTIterator implements Iterator<T>, Iterable<T> {
+    private class AllItemIterator implements Iterator<Item>, Iterable<Item> {
         private int index;
 
-        AllTIterator() {
+        AllItemIterator() {
             index = mod(next_first + 1);
         }
 
@@ -161,21 +161,21 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return index != next_last;
         }
 
-        public T next() {
-            T value = items[index];
+        public Item next() {
+            Item value = items[index];
             index = mod(index + 1);
 
             return value;
         }
 
-        public Iterator<T> iterator() {
+        public Iterator<Item> iterator() {
             return this;
         }
     }
 
     @Override
-    public Iterator<T> iterator() {
-        return new AllTIterator();
+    public Iterator<Item> iterator() {
+        return new AllItemIterator();
     }
 
     private int mod(int i) {
