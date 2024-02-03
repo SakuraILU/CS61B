@@ -32,7 +32,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public void addFirst(T item) {
         if (size() == items.length) {
-            resize(2 * items.length);
+            resize((int) (1.5 * items.length));
         }
 
         size++;
@@ -44,7 +44,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public void addLast(T item) {
         if (size() == items.length) {
-            resize(2 * items.length);
+            resize((int) (1.5 * items.length));
         }
 
         size++;
