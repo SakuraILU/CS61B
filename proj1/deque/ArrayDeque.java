@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<Item> implements Iterable<Item> {
+public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
 
     private Item[] items;
     private int size;
@@ -30,6 +30,7 @@ public class ArrayDeque<Item> implements Iterable<Item> {
         next_last = mod(size());
     }
 
+    @Override
     public void addFirst(Item item) {
         if (size() == items.length - 1) {
             resize(2 * items.length);
@@ -41,6 +42,7 @@ public class ArrayDeque<Item> implements Iterable<Item> {
         next_first = mod(next_first - 1);
     }
 
+    @Override
     public void addLast(Item item) {
         if (size() == items.length - 1) {
             resize(2 * items.length);
@@ -52,14 +54,12 @@ public class ArrayDeque<Item> implements Iterable<Item> {
         next_last = mod(next_last + 1);
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
+    @Override
     public int size() {
         return size;
     }
 
+    @Override
     public void printDeque() {
         int start = mod(next_first + 1);
         int end = mod(next_last);
@@ -69,6 +69,7 @@ public class ArrayDeque<Item> implements Iterable<Item> {
         System.out.println("");
     }
 
+    @Override
     public Item removeFirst() {
         if (size() > 16 && size() < items.length * 0.25) {
             resize((int) (0.5 * items.length));
@@ -86,6 +87,7 @@ public class ArrayDeque<Item> implements Iterable<Item> {
         return value;
     }
 
+    @Override
     public Item removeLast() {
         if (size() > 16 && size() < items.length * 0.25) {
             resize((int) (0.5 * items.length));
@@ -103,6 +105,7 @@ public class ArrayDeque<Item> implements Iterable<Item> {
         return value;
     }
 
+    @Override
     public Item get(int index) {
         if (index >= size()) {
             return null;
