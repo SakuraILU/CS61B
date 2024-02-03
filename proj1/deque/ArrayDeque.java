@@ -19,9 +19,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private void resize(int capacity) {
         T[] new_items = (T[]) new Object[capacity];
 
-        int start = mod(next_first + 1);
-        int end = mod(next_last);
-        for (int i = start, j = 0; i != end; i = mod(i + 1), j++) {
+        int i = mod(next_first + 1);
+        for (int j = 0; j < size(); j++, i = mod(i + 1)) {
             new_items[j] = items[i];
         }
         items = new_items;
@@ -32,7 +31,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void addFirst(T item) {
-        if (size() == items.length - 1) {
+        if (size() == items.length) {
             resize(2 * items.length);
         }
 
@@ -44,7 +43,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void addLast(T item) {
-        if (size() == items.length - 1) {
+        if (size() == items.length) {
             resize(2 * items.length);
         }
 
@@ -61,9 +60,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void printDeque() {
-        int start = mod(next_first + 1);
-        int end = mod(next_last);
-        for (int i = start; i != end; i++) {
+        int i = mod(next_first + 1);
+        for (int k = 0; k < size(); k++, i = mod(i + 1)) {
             System.out.printf("%s ", items[i]);
         }
         System.out.println("");
@@ -71,7 +69,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public T removeFirst() {
-        if (size() > 16 && size() < items.length * 0.25) {
+        if (size() >= 16 && size() < items.length * 0.25) {
             resize((int) (0.5 * items.length));
         }
 
@@ -89,7 +87,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public T removeLast() {
-        if (size() > 16 && size() < items.length * 0.25) {
+        if (size() >= 16 && size() < items.length * 0.25) {
             resize((int) (0.5 * items.length));
         }
 
@@ -126,7 +124,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
 
-        ArrayDeque<T> other = (ArrayDeque<T>) o;
+        Deque<T> other = (Deque<T>) o;
 
         if (other.size() != this.size()) {
             return false;
@@ -136,12 +134,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
 
-        Iterator<T> itr_this = iterator();
-        Iterator<T> itr_other = other.iterator();
-        while (itr_this.hasNext()) {
-            T value1 = itr_this.next();
-            T value2 = itr_other.next();
-            if (!value1.equals(value2)) {
+        for (int i = 0; i < size(); i++) {
+            if (!other.get(i).equals(this.get(i))) {
                 return false;
             }
         }
