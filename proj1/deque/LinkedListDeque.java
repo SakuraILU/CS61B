@@ -151,7 +151,9 @@ public class LinkedListDeque<Item> implements Deque<Item>, Iterable<Item> {
         Iterator<Item> itr_this = iterator();
         Iterator<Item> itr_other = other.iterator();
         while (itr_this.hasNext()) {
-            if (itr_this.next() != itr_other.next()) {
+            Item value1 = itr_this.next();
+            Item value2 = itr_other.next();
+            if (!value1.equals(value2)) {
                 return false;
             }
         }

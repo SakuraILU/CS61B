@@ -3,6 +3,8 @@ package deque;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.Iterator;
+
 public class ArrayDequeTest {
     @Test
     /*
@@ -152,26 +154,62 @@ public class ArrayDequeTest {
     }
 
     @Test
-    /* Test equal **/
-    public void equalTest() {
-        ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
-        ArrayDeque<Integer> ad2 = new ArrayDeque<Integer>();
-        ArrayDeque<Integer> ad3 = new ArrayDeque<Integer>();
+    /* Test Iterator hasNext with items */
+    public void testHasNextBaseCase() {
+        ArrayDeque<Integer> ad = new ArrayDeque<Integer>();
+        ad.addFirst(1);
+        Iterator<Integer> itr = ad.iterator();
+        assertTrue(itr.hasNext());
+        int i = itr.next();
+        assertEquals(1, i);
+    }
 
-        for (int i = 0; i < 100; i++) {
-            ad1.addLast(i);
-            ad2.addLast(i);
-            ad3.addLast(i);
+    @Test
+    /* Test hash next on empty deque **/
+    public void hasNextEmpty() {
+        ArrayDeque<Integer> ad = new ArrayDeque<Integer>();
+        assertFalse(ad.iterator().hasNext());
+    }
+
+    @Test
+    public void testNext() {
+        ArrayDeque<Integer> ad = new ArrayDeque<Integer>();
+        for (int i = 0; i < 10000; i++) {
+            ad.addLast(i);
         }
 
-        assertTrue("Should be equal", ad1.equals(ad2));
-        assertTrue("Should be equal", ad2.equals(ad1));
-        assertTrue("Should be equal", ad1.equals(ad3));
+        int i = 0;
+        Iterator<Integer> itr = ad.iterator();
+        while (itr.hasNext()) {
+            assertEquals("Should have the same value", i, (int) itr.next(), 0);
+            i++;
+        }
+    }
 
-        ad1.removeFirst();
-        assertFalse("Should not be equal", ad1.equals(ad2));
-        assertFalse("Should not be equal", ad2.equals(ad1));
-        assertFalse("Should not be equal", ad1.equals(ad3));
+    @Test
+    /* Test Iterator hasNext after calling next() many times */
+    public void testHasNextFalse() {
+        ArrayDeque<Integer> ad = new ArrayDeque<Integer>();
+        for (int i = 0; i < 10000; i++) {
+            ad.addLast(i);
+        }
 
+        Iterator<Integer> itr = ad.iterator();
+        for (int i = 0; i < 10000; i++) {
+            itr.next();
+        }
+        assertFalse(itr.hasNext());
+    }
+
+    @Test
+    /* test two deque equal */
+    public void testEqualTrue() {
+        ArrayDeque<Integer> ad1 = new ArrayDeque<Integer>();
+        ArrayDeque<Integer> ad2 = new ArrayDeque<Integer>();
+        for (int i = 0; i < 130; i++) {
+            ad1.addLast(i);
+            ad2.addLast(i);
+        }
+        assertTrue(ad1.equals(ad2));
     }
 }

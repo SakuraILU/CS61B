@@ -1,5 +1,7 @@
 package deque;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Iterator;
 
 public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
@@ -134,7 +136,9 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
         Iterator<Item> itr_this = iterator();
         Iterator<Item> itr_other = other.iterator();
         while (itr_this.hasNext()) {
-            if (itr_this.next() != itr_other.next()) {
+            Item value1 = itr_this.next();
+            Item value2 = itr_other.next();
+            if (!value1.equals(value2)) {
                 return false;
             }
         }
@@ -146,16 +150,16 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
         private int index;
 
         AllItemIterator() {
-            index = (next_first + 1) % items.length;
+            index = mod(next_first + 1);
         }
 
         public boolean hasNext() {
-            return index == next_last;
+            return index != next_last;
         }
 
         public Item next() {
             Item value = items[index];
-            index = (index + 1) % items.length;
+            index = mod(index + 1);
 
             return value;
         }

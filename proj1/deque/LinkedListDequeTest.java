@@ -185,4 +185,16 @@ public class LinkedListDequeTest {
         assertFalse("Should not be equal", lld2.equals(lld1));
         assertFalse("Should not be equal", lld1.equals(lld3));
     }
+
+    @Test
+    /* test two deque equal */
+    public void testEqualTrue() {
+        LinkedListDeque<Integer> ld1 = new LinkedListDeque<Integer>();
+        LinkedListDeque<Integer> ld2 = new LinkedListDeque<Integer>();
+        for (int i = 0; i < 130; i++) {
+            ld1.addLast(i);
+            ld2.addLast(i);
+        }
+        assertTrue(ld1.equals(ld2));
+    }
 }
