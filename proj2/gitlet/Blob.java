@@ -27,7 +27,7 @@ public class Blob implements Dumpable {
         this.fileName = this.source.getPath();
         this.contents = readContents(source);
         this.id = sha1(fileName, contents);
-        this.file = newObjectFile(id);
+        this.file = newBlobFile(id);
     }
 
     /**
@@ -37,7 +37,7 @@ public class Blob implements Dumpable {
      * @return Blob instance
      */
     public static Blob fromFile(String id) {
-        File file = newObjectFile(id);
+        File file = newBlobFile(id);
         if (!file.exists()) {
             exit("No blob with that id exists.");
         }
@@ -48,7 +48,17 @@ public class Blob implements Dumpable {
      * Save the Blob instance to a Object File
      */
     public void saveBlob() {
-        saveObjectFile(file, this);
+        // if the parent directory does not exist, create it
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            try {
+                file.createNewFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        writeObject(file, this);
     }
 
     /**
@@ -113,4 +123,19 @@ public class Blob implements Dumpable {
     public void dump() {
         System.out.println(this);
     }
+
+    private static File newBlobFile(String id) {
+        String dir = blobDir(id);
+        String fileName = blobFileName(id);
+        return join(Repository.OBJECTS_DIR, dir, fileName);
+    }
+
+    private static String blobDir(String id) {
+        return id.substring(0, 2);
+    }
+
+    private static String blobFileName(String id) {
+        return id.substring(2);
+    }
+
 }

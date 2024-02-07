@@ -23,7 +23,20 @@ public class Branch implements Dumpable {
     }
 
     public void saveBranch() {
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            try {
+                file.createNewFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         Utils.writeObject(file, this);
+    }
+
+    public void deleteBranch() {
+        file.delete();
     }
 
     public static Branch fromFile(String name) {

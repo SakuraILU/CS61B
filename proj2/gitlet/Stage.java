@@ -86,10 +86,9 @@ public class Stage implements Dumpable {
      * @return true if the file was removed, false otherwise
      */
     public boolean removeFile(File file) {
-        boolean changed = true;
+        boolean changed = false;
 
-        Blob blob = new Blob(file);
-        String fileName = blob.getFileName();
+        String fileName = file.getName();
 
         if (addedFiles.remove(fileName) != null) {
             changed = true;
@@ -124,18 +123,27 @@ public class Stage implements Dumpable {
             trackedFiles.remove(fileName);
         }
 
-        clear();
+        clearChanges();
 
         return true;
     }
 
     /**
-     * Get the tracked files.
+     * Get the added files.
      * 
-     * @return the tracked files
+     * @return the added files
      */
     public Map<String, String> getAddedFiles() {
         return addedFiles;
+    }
+
+    /**
+     * Get the added file names.
+     * 
+     * @return the added file names
+     */
+    public Set<String> getAddedFileNames() {
+        return addedFiles.keySet();
     }
 
     /**
@@ -159,9 +167,20 @@ public class Stage implements Dumpable {
     /**
      * Clear the stage.
      */
-    public void clear() {
+    private void clearChanges() {
         addedFiles.clear();
         removedFileNames.clear();
+    }
+
+    /**
+     * Clear the stage for checkout to other branch.
+     * 
+     * @return
+     */
+    public void clearStage(Map<String, String> trackedFiles) {
+        addedFiles.clear();
+        removedFileNames.clear();
+        this.trackedFiles = trackedFiles;
     }
 
     /**

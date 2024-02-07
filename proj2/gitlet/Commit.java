@@ -1,9 +1,10 @@
 package gitlet;
 
-import static gitlet.MyUtils.newObjectFile;
-import static gitlet.MyUtils.saveObjectFile;
+import static gitlet.Utils.join;
+import static gitlet.Utils.plainFilenamesIn;
 import static gitlet.Utils.readObject;
 import static gitlet.Utils.sha1;
+import static gitlet.Utils.writeObject;
 
 // TODO: any imports you need here
 
@@ -52,7 +53,7 @@ public class Commit implements Dumpable {
         this.trackedFiles = new HashMap<String, String>();
         this.parents = new LinkedList<String>();
         this.id = sha1(this.message);
-        this.file = newObjectFile(id);
+        this.file = join(Repository.OBJECTS_DIR, this.id);
     }
 
     /**
@@ -68,7 +69,7 @@ public class Commit implements Dumpable {
         this.parents = parents;
         this.trackedFiles = trackedFiles;
         this.id = sha1(getTimestamp(), message, parents.toString(), trackedFiles.toString());
-        this.file = newObjectFile(this.id);
+        this.file = join(Repository.OBJECTS_DIR, this.id);
     }
 
     /**
@@ -77,8 +78,9 @@ public class Commit implements Dumpable {
      * @param id ID of the Object File
      * @return
      */
-    public static Commit fromFile(String id) {
-        File file = newObjectFile(id);
+    public static Commit fromFile(String commitId) {
+        commitId = findCommitIdWithPrefix(commitId);
+        File file = join(Repository.OBJECTS_DIR, commitId);
         if (!file.exists()) {
             MyUtils.exit("No commit with that id exists.");
         }
@@ -89,7 +91,17 @@ public class Commit implements Dumpable {
      * Save the Commit instance to a object file.
      */
     public void saveCommit() {
-        saveObjectFile(file, this);
+        // if the parent directory does not exist, create it
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            try {
+                file.createNewFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        writeObject(file, this);
     }
 
     /**
@@ -149,12 +161,14 @@ public class Commit implements Dumpable {
     /**
      * String representation of this Commit
      * if the Commit has only one parent, format follows:
+     * ===
      * commit a0da1ea5a15ab613bf9961fd86f010cf74c7ee48
      * Date: Thu Nov 9 20:00:05 2017 -0800
      * A commit message.
      * 
      * 
      * if the Commit has two parents (a merged Commit), format follows:
+     * ===
      * commit 3e8bf1d794ca2e9ef8a4007275acf3751c7170ff
      * Merge: 4975af1 2c1ead1
      * Date: Sat Nov 11 12:30:00 2017 -0800
@@ -196,9 +210,33 @@ public class Commit implements Dumpable {
         System.out.println(this);
     }
 
+    /**
+     * Get the timestamp of this Commit
+     * 
+     * @return
+     */
     private String getTimestamp() {
         // Thu Jan 1 00:00:00 1970 +0000
         DateFormat dateFormat = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
         return dateFormat.format(date);
     }
+
+    private static String findCommitIdWithPrefix(String idPrefix) {
+        if (idPrefix.length() == 40) {
+            return idPrefix;
+        }
+        if (idPrefix.length() < 4) {
+            MyUtils.exit("pathspec '%s' did not match any file(s) known to git.", idPrefix);
+        }
+
+        List<String> commitIds = plainFilenamesIn(Repository.OBJECTS_DIR);
+        for (String id : commitIds) {
+            if (id.startsWith(idPrefix)) {
+                return id;
+            }
+        }
+
+        return null;
+    }
+
 }
