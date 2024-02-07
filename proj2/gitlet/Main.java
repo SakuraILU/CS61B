@@ -12,13 +12,18 @@ public class Main {
      * <COMMAND> <OPERAND1> <OPERAND2> ...
      */
     public static void main(String[] args) {
-        // TODO: what if args is empty?
+        // what if args is empty?
         if (args.length == 0) {
             MyUtils.exit("Please Enter a command");
         }
 
-        String firstArg = args[0];
-        switch (firstArg) {
+        String command = args[0];
+        // what if not in an initialized gitlet directory?
+        if (!command.equals("init") && !Repository.isInitialized()) {
+            MyUtils.exit("Not in an initialized Gitlet directory.");
+        }
+
+        switch (command) {
             case "init": {
                 // handle the `init` command
                 validateArgs(args, 1);
@@ -120,6 +125,10 @@ public class Main {
 
                 String commitId = args[1];
                 Repository.reset(commitId);
+                break;
+            }
+            default: {
+                MyUtils.exit("No command with that name exists.");
                 break;
             }
         }

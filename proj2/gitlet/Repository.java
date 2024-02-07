@@ -53,7 +53,7 @@ public class Repository {
 
     /* TODO: fill in the rest of this class. */
     public static void init() {
-        if (GITLET_DIR.exists()) {
+        if (isInitialized()) {
             MyUtils.exit("A Gitlet version-control system already exists in the current directory.");
         }
 
@@ -78,6 +78,15 @@ public class Repository {
 
         Stage stage = new Stage();
         stage.saveStage();
+    }
+
+    /**
+     * Check if the gitlet repository is initialized.
+     * 
+     * @return true if the current directory is in a gitlet repository
+     */
+    public static boolean isInitialized() {
+        return GITLET_DIR.exists();
     }
 
     /**
