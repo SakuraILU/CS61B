@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.*;
 
 import static gitlet.Utils.join;
 import static gitlet.Utils.writeObject;

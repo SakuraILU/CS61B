@@ -1,6 +1,7 @@
 package gitlet;
 
 import static gitlet.Utils.readObject;
+import static gitlet.Utils.restrictedDelete;
 import static gitlet.Utils.writeObject;
 
 import java.io.File;
@@ -70,7 +71,7 @@ public class Stage implements Dumpable {
             changed = false;
         } else {
             changed = true;
-            if (blob.getFile().exists()) {
+            if (!blob.getFile().exists()) {
                 blob.saveBlob();
             }
         }
@@ -100,7 +101,7 @@ public class Stage implements Dumpable {
             }
 
             if (file.exists()) {
-                file.delete();
+                restrictedDelete(file);
             }
         }
 

@@ -79,6 +79,9 @@ public class Commit implements Dumpable {
      */
     public static Commit fromFile(String id) {
         File file = newObjectFile(id);
+        if (!file.exists()) {
+            MyUtils.exit("No commit with that id exists.");
+        }
         return readObject(file, Commit.class);
     }
 
@@ -90,12 +93,12 @@ public class Commit implements Dumpable {
     }
 
     /**
-     * Is init Commit which has no parent
+     * Wehter this Commit has parents
      * 
-     * @return true if it is init Commit
+     * @return true if this Commit has parents, false otherwise.
      */
-    public boolean isInitCommit() {
-        return parents.isEmpty();
+    public boolean hasParents() {
+        return parents.size() > 0;
     }
 
     /**

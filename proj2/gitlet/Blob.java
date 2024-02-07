@@ -37,8 +37,11 @@ public class Blob implements Dumpable {
      * @return Blob instance
      */
     public static Blob fromFile(String id) {
-        File object = newObjectFile(id);
-        return readObject(object, Blob.class);
+        File file = newObjectFile(id);
+        if (!file.exists()) {
+            exit("No blob with that id exists.");
+        }
+        return readObject(file, Blob.class);
     }
 
     /**

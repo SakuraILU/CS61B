@@ -21,30 +21,63 @@ public class Main {
 
         String firstArg = args[0];
         switch (firstArg) {
-            case "init":
+            case "init": {
                 // handle the `init` command
                 Repository.init();
                 break;
-            case "add":
-                // handle the `add [filename]` command
+            }
+            case "add": {
+                // handle the `add [file name]` command
                 String fileName = args[1];
-                Repository.add(new File(fileName));
+                Repository.add(fileName);
                 break;
-            // TODO: FILL THE REST IN
-            case "rm":
-                // handle the `rm [filename]` command
-                fileName = args[1];
-                Repository.rm(new File(fileName));
+            }
+            case "rm": {
+                // handle the `rm [file name]` command
+                String fileName = args[1];
+                Repository.rm(fileName);
                 break;
-            case "commit":
+            }
+            case "commit": {
                 // handle the `commit [message]` command
                 String message = args[1];
                 Repository.commit(message);
                 break;
-            case "log":
+            }
+            case "log": {
                 // handle the `log` command
                 Repository.log();
                 break;
+            }
+            case "global-log": {
+                // handle the `global-log` command
+                Repository.globalLog();
+                break;
+            }
+            case "find": {
+                // handle the `find [message]` command
+                String message = args[1];
+                Repository.find(message);
+                break;
+            }
+            case "checkout": {
+                if (args.length == 3) {
+                    // handle the `checkout -- [finename]` command
+                    String fileName = args[2];
+                    Repository.checkoutFile(fileName);
+                } else if (args.length == 4) {
+                    // handle the `checkout [commit id] -- [file name]`
+                    String commitId = args[1];
+                    String fileName = args[3];
+                    Repository.checkoutFile(commitId, fileName);
+                } else if (args.length == 2) {
+                    // handle the `checkout [branch name]` command
+                    String branchName = args[1];
+                    Repository.checkoutBranch(branchName);
+                } else {
+                    MyUtils.exit("Incorrect operands.");
+                }
+            }
         }
     }
 }

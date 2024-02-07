@@ -28,6 +28,9 @@ public class Branch implements Dumpable {
 
     public static Branch fromFile(String name) {
         File file = Utils.join(Repository.REFS_DIR, name);
+        if (!file.exists()) {
+            MyUtils.exit("No such branch exists.");
+        }
         return Utils.readObject(file, Branch.class);
     }
 
