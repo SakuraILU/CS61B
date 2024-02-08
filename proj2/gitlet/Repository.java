@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static gitlet.MyUtils.differenceSet;
+import static gitlet.MyUtils.unionSet;
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -144,9 +145,9 @@ public class Repository {
         String prevCommitId = branch.getCommitId();
 
         // create a new Commit
-        LinkedList<String> parents = new LinkedList<String>();
-        parents.add(prevCommitId);
-        Commit commit = new Commit(message, parents, trackedFiles);
+        LinkedList<String> parentIds = new LinkedList<String>();
+        parentIds.add(prevCommitId);
+        Commit commit = new Commit(message, parentIds, trackedFiles);
         commit.saveCommit();
 
         // update the branch
@@ -159,15 +160,14 @@ public class Repository {
      */
     public static void log() {
         Commit curCommit = currentCommit();
-        while (true) {
-            System.out.println("===");
-            System.out.println(curCommit);
 
-            if (!curCommit.hasParents()) {
+        CommitIterator commitIterator = new CommitIterator(curCommit);
+        for (Commit commit : commitIterator) {
+            System.out.println("===");
+            System.out.println(commit);
+            if (commit.isInitCommit()) {
                 break;
             }
-            String parentId = curCommit.getParents().get(0);
-            curCommit = Commit.fromFile(parentId);
         }
     }
 
@@ -209,7 +209,7 @@ public class Repository {
         System.out.println("=== Branches ===");
         System.out.printf("*%s\n", curBranch.getBranchName());
         for (Branch branch : branches) {
-            if (branch.getBranchName().equals(curBranch.getBranchName())) {
+            if (branch.equals(curBranch)) {
                 continue;
             }
             System.out.println(branch.getBranchName());
@@ -272,10 +272,10 @@ public class Repository {
      * @param branchName the branch name.
      */
     public static void checkoutBranch(String branchName) {
-        if (branchName.equals(currentBranch().getBranchName())) {
+        Branch branch = Branch.fromFile(branchName);
+        if (branch.equals(currentBranch())) {
             MyUtils.exit("No need to checkout the current branch.");
         }
-        Branch branch = Branch.fromFile(branchName);
         Commit commit = branch.dereference();
         checkoutCommit(commit);
 
@@ -336,14 +336,14 @@ public class Repository {
 
         // clear stage
         Stage stage = Stage.fromFile();
-        stage.clearStage(otherCommit.getTrackedFiles());
+        stage.clearForCheckoutCommit(otherCommit);
         stage.saveStage();
     }
 
     /**
      * Checkout the file with the given commit id and file name.
      * This is a general private method to checkout a file, used to support the
-     * three public checkout methods.
+     * checkout methods.
      * 
      * @param commit the commit.
      * @param file   the file.
@@ -456,43 +456,6 @@ public class Repository {
         return commits;
     }
 
-    // /**
-    // * Find all commits in the repository.
-    // *
-    // * @return all commits in the repository.
-    // */
-    // private static Set<Commit> findAllCommits() {
-    // // Use BFS method to find all commits in the Commit graph, starting from the
-    // // commits refered by all branches
-    // Set<Branch> branches = findAllBranches();
-
-    // Set<Commit> commits = new HashSet<Commit>();
-    // for (Branch branch : branches) {
-    // commits.add(branch.dereference());
-    // }
-
-    // Set<Commit> set = new HashSet<Commit>();
-    // Set<Commit> next_set = new HashSet<Commit>();
-    // set.addAll(commits);
-    // while (!set.isEmpty()) {
-    // for (Commit commit : set) {
-    // List<String> parentIds = commit.getParents();
-    // for (String parentId : parentIds) {
-    // Commit parentCommit = Commit.fromFile(parentId);
-    // if (!commits.contains(parentCommit)) {
-    // next_set.add(parentCommit);
-    // }
-    // }
-    // }
-
-    // commits.addAll(next_set);
-    // set = next_set;
-    // next_set = new HashSet<Commit>();
-    // }
-
-    // return commits;
-    // }
-
     /**
      * Find all untracked file names in the current working directory.
      * 
@@ -538,5 +501,255 @@ public class Repository {
         }
 
         return fileNames;
+    }
+
+    /**
+     * Merge the branch with the given branch name.
+     * 
+     * @param branchName the branch name.
+     */
+    public static void merge(String branchName) {
+        Stage stage = Stage.fromFile();
+        if (!stage.isEmpty()) {
+            MyUtils.exit("You have uncommitted changes.");
+        }
+
+        File file = join(REFS_DIR, branchName);
+        if (!file.exists()) {
+            MyUtils.exit("A branch with that name does not exist.");
+        }
+        Branch branch = Branch.fromFile(branchName);
+        if (branch.equals(currentBranch())) {
+            MyUtils.exit("Cannot merge a branch with itself.");
+        }
+
+        Commit curCommit = currentCommit();
+        Commit otherCommit = branch.dereference();
+        Commit splitCommit = findSplitCommit(curCommit, otherCommit);
+
+        // check if the split commit is the same as the given branch
+        if (splitCommit.equals(otherCommit)) {
+            MyUtils.exit("Given branch is an ancestor of the current branch.");
+        }
+        // check if the split commit is the same as the current branch
+        if (splitCommit.equals(curCommit)) {
+            checkoutBranch(branchName);
+            MyUtils.exit("Current branch fast-forwarded.");
+        }
+
+        Map<String, String> curFiles = curCommit.getTrackedFiles();
+        Map<String, String> otherFiles = otherCommit.getTrackedFiles();
+        Map<String, String> splitFiles = splitCommit.getTrackedFiles();
+        Set<String> allFiles = unionSet(curFiles.keySet(), otherFiles.keySet());
+
+        Map<String, String> mergedFiles = new HashMap<String, String>();
+        Set<String> removedFileNames = new HashSet<String>();
+        Map<String, String> conflictFiles = new HashMap<String, String>();
+
+        boolean conflict = false;
+        for (String fileName : allFiles) {
+            if (curFiles.containsKey(fileName) && otherFiles.containsKey(fileName)) {
+                String curBlobId = curFiles.get(fileName);
+                String otherBlobId = otherFiles.get(fileName);
+                if (curBlobId.equals(otherBlobId)) {
+                    mergedFiles.put(fileName, curBlobId);
+                } else {
+                    if (!splitFiles.containsKey(fileName)) {
+                        // handle conflict
+                        conflict = true;
+                        String contents = conflictContents(fileName, curBlobId, otherBlobId);
+                        conflictFiles.put(fileName, contents);
+                    } else {
+                        String splitBlobId = splitFiles.get(fileName);
+                        if (splitBlobId.equals(otherBlobId) && !splitBlobId.equals(curBlobId)) {
+                            mergedFiles.put(fileName, curBlobId);
+                        } else if (splitBlobId.equals(curBlobId) && !splitBlobId.equals(otherBlobId)) {
+                            mergedFiles.put(fileName, otherBlobId);
+                        } else {
+                            // handle conflict
+                            conflict = true;
+                            String contents = conflictContents(fileName, curBlobId, otherBlobId);
+                            conflictFiles.put(fileName, contents);
+                        }
+                    }
+                }
+            } else if (curFiles.containsKey(fileName) && !otherFiles.containsKey(fileName)) {
+                if (!splitFiles.containsKey(fileName)) {
+                    String curBlobId = curFiles.get(fileName);
+                    mergedFiles.put(fileName, curBlobId);
+                } else {
+                    String curBlobId = curFiles.get(fileName);
+                    String splitBlobId = splitFiles.get(fileName);
+                    if (splitBlobId.equals(curBlobId)) {
+                        // remove this file
+                        removedFileNames.add(fileName);
+                    } else {
+                        // handle conflict
+                        conflict = true;
+                        String contents = conflictContents(fileName, curBlobId, "");
+                        conflictFiles.put(fileName, contents);
+                    }
+                }
+            } else {
+                if (!splitFiles.containsKey(fileName)) {
+                    String otherBlobId = otherFiles.get(fileName);
+                    mergedFiles.put(fileName, otherBlobId);
+                } else {
+                    String otherBlobId = otherFiles.get(fileName);
+                    String splitBlobId = splitFiles.get(fileName);
+                    if (splitBlobId.equals(otherBlobId)) {
+                        // nothing to do
+                    } else {
+                        // handle conflict
+                        conflict = true;
+                        String contents = conflictContents(fileName, "", otherBlobId);
+                        conflictFiles.put(fileName, contents);
+                    }
+                }
+            }
+        }
+
+        // check if there are untracked files are overwritten
+        Set<String> untrackedFileNames = findAllUntrackedFileNames();
+        Set<String> allMergedFileNames = unionSet(mergedFiles.keySet(), conflictFiles.keySet());
+        if (MyUtils.intersectionSet(allMergedFileNames, untrackedFileNames).size() > 0) {
+            MyUtils.exit("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+
+        // print the conflict message
+        if (conflict) {
+            System.out.println("Encountered a merge conflict.");
+        }
+        // write conflict contents to file and blob
+        for (String fileName : conflictFiles.keySet()) {
+            File fileToWrite = new File(fileName);
+            String contents = conflictFiles.get(fileName);
+            writeContents(fileToWrite, contents.getBytes());
+
+            Blob blob = new Blob(fileToWrite);
+            blob.saveBlob();
+            mergedFiles.put(fileName, blob.getId());
+        }
+        // checkout merged files
+        for (String fileName : mergedFiles.keySet()) {
+            String blobId = mergedFiles.get(fileName);
+            Blob blob = Blob.fromFile(blobId);
+            byte contents[] = blob.getContents();
+            File fileToWrite = new File(fileName);
+            writeContents(fileToWrite, contents);
+        }
+
+        // delete files
+        for (String fileName : removedFileNames) {
+            File fileToRemove = new File(fileName);
+            fileToRemove.delete();
+        }
+
+        // create a new commit
+        Branch curBranch = currentBranch();
+        String message = String.format("Merged %s into %s.", branchName, curBranch.getBranchName());
+        LinkedList<String> parentIds = new LinkedList<String>();
+        parentIds.add(curCommit.getId());
+        parentIds.add(otherCommit.getId());
+        Commit commit = new Commit(message, parentIds, mergedFiles);
+        commit.saveCommit();
+
+        // update the current branch
+        curBranch.referTo(commit.getId());
+        curBranch.saveBranch();
+
+        // clear stage
+        stage.clearForCheckoutCommit(commit);
+        stage.saveStage();
+    }
+
+    /**
+     * Find the split point of the two commits.
+     * 
+     * @param commit1 the first commit.
+     * @param commit2 the second commit.
+     * @return the split commit.
+     */
+    public static Commit findSplitCommit(Commit commit1, Commit commit2) {
+        Set<Commit> prevCommits1 = findPrevCommits(commit1);
+        Set<Commit> prevCommits2 = findPrevCommits(commit2);
+
+        Set<Commit> commonCommit = MyUtils.intersectionSet(prevCommits1, prevCommits2);
+        Commit lcaCommit = null; // last common ancestor commit
+        for (Commit commit : commonCommit) {
+            if (lcaCommit == null || commit.dateAfter(lcaCommit)) {
+                lcaCommit = commit;
+            }
+        }
+
+        return lcaCommit;
+    }
+
+    public static Set<Commit> findPrevCommits(Commit commit) {
+        Set<Commit> commits = new HashSet<Commit>();
+        commits.add(commit);
+
+        for (String parentId : commit.getParentIds()) {
+            Commit parentCommit = Commit.fromFile(parentId);
+            commits.addAll(findPrevCommits(parentCommit));
+        }
+
+        return commits;
+    }
+
+    private static String conflictContents(String fileName, String curBlobId, String otherBlobId) {
+        String curContents = "";
+        if (!curBlobId.equals("")) {
+            Blob curBlob = Blob.fromFile(curBlobId);
+            curContents = new String(curBlob.getContents());
+        }
+        String otherContents = "";
+        if (!otherBlobId.equals("")) {
+            Blob otherBlob = Blob.fromFile(otherBlobId);
+            otherContents = new String(otherBlob.getContents());
+        }
+
+        String contents = String.format("<<<<<<< HEAD\n%s=======\n%s>>>>>>>\n", curContents, otherContents);
+        return contents;
+    }
+
+    /**
+     * Represent a Iterator of the Commit.
+     * Iterator from a given Commit to the init Commit,
+     * if there are multi-parentIds, choose the first parent to move forward.
+     */
+    private static class CommitIterator implements Iterator<Commit>, Iterable<Commit> {
+
+        private Commit curCommit;
+
+        CommitIterator(Commit commit) {
+            this.curCommit = commit;
+        }
+
+        public boolean hasNext() {
+            return curCommit != null;
+        }
+
+        public Commit next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            Commit commit = curCommit;
+
+            if (commit.isInitCommit()) {
+                curCommit = null;
+            } else {
+                String parentId = curCommit.getParentIds().get(0);
+                curCommit = Commit.fromFile(parentId);
+            }
+
+            return commit;
+        }
+
+        @Override
+        public Iterator<Commit> iterator() {
+            return this;
+        }
     }
 }

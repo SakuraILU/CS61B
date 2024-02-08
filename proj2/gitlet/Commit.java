@@ -34,7 +34,7 @@ public class Commit implements Dumpable {
     /** The message */
     private final String message;
     /** The parents */
-    private final List<String> parents;
+    private final List<String> parentIds;
     /** The map[path:id] of tracked files */
     private final Map<String, String> trackedFiles;
     /** The ID */
@@ -51,7 +51,7 @@ public class Commit implements Dumpable {
         this.date = new Date(0);
         this.message = "initial commit";
         this.trackedFiles = new HashMap<String, String>();
-        this.parents = new LinkedList<String>();
+        this.parentIds = new LinkedList<String>();
         this.id = sha1(this.message);
         this.file = join(Repository.OBJECTS_DIR, this.id);
     }
@@ -63,12 +63,12 @@ public class Commit implements Dumpable {
      * @param parents
      * @param trackedFiles
      */
-    public Commit(String message, List<String> parents, Map<String, String> trackedFiles) {
+    public Commit(String message, List<String> parentIds, Map<String, String> trackedFiles) {
         this.date = new Date();
         this.message = message;
-        this.parents = parents;
+        this.parentIds = parentIds;
         this.trackedFiles = trackedFiles;
-        this.id = sha1(getTimestamp(), message, parents.toString(), trackedFiles.toString());
+        this.id = sha1(getTimestamp(), message, parentIds.toString(), trackedFiles.toString());
         this.file = join(Repository.OBJECTS_DIR, this.id);
     }
 
@@ -105,12 +105,12 @@ public class Commit implements Dumpable {
     }
 
     /**
-     * Wehter this Commit has parents
+     * Wehter this Commit is the init Commit
      * 
-     * @return true if this Commit has parents, false otherwise.
+     * @return true if this Commit is the init Commit, false otherwise.
      */
-    public boolean hasParents() {
-        return parents.size() > 0;
+    public boolean isInitCommit() {
+        return parentIds.size() == 0;
     }
 
     /**
@@ -136,8 +136,8 @@ public class Commit implements Dumpable {
      * 
      * @return Commit parents
      */
-    public List<String> getParents() {
-        return parents;
+    public List<String> getParentIds() {
+        return parentIds;
     }
 
     /**
@@ -186,11 +186,11 @@ public class Commit implements Dumpable {
         sb.append("commit ").append(id).append("\n");
 
         // Merge: <parent1> <parent2>
-        if (parents.size() == 2) {
-            String parentId0 = parents.get(0).substring(0, 7);
-            String parentId1 = parents.get(1).substring(0, 7);
+        if (parentIds.size() == 2) {
+            String parentId0 = parentIds.get(0).substring(0, 7);
+            String parentId1 = parentIds.get(1).substring(0, 7);
             sb.append("Merge: ").append(parentId0).append(" ").append(parentId1).append("\n");
-        } else if (parents.size() > 2) {
+        } else if (parentIds.size() > 2) {
             MyUtils.exit("Invalid commit: more than 2 parents.");
         }
 
@@ -208,6 +208,37 @@ public class Commit implements Dumpable {
      */
     public void dump() {
         System.out.println(this);
+    }
+
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof Commit)) {
+            return false;
+        }
+
+        Commit otherCommit = (Commit) other;
+        if (!this.id.equals(otherCommit.id)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    /**
+     * Check if the date of this Commit is after that of the otherCommit
+     * 
+     * @param otherCommit
+     * @return
+     */
+    public boolean dateAfter(Commit otherCommit) {
+        return this.date.compareTo(otherCommit.date) > 0;
     }
 
     /**
@@ -238,5 +269,4 @@ public class Commit implements Dumpable {
 
         return null;
     }
-
 }

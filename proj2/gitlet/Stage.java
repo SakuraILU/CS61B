@@ -173,14 +173,14 @@ public class Stage implements Dumpable {
     }
 
     /**
-     * Clear the stage for checkout to other branch.
+     * Clear the stage when checkout to other branch.
      * 
-     * @return
+     * @param trackFiles the track files of the given branch
      */
-    public void clearStage(Map<String, String> trackedFiles) {
+    public void clearForCheckoutCommit(Commit commit) {
         addedFiles.clear();
         removedFileNames.clear();
-        this.trackedFiles = trackedFiles;
+        this.trackedFiles = commit.getTrackedFiles();
     }
 
     /**

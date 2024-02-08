@@ -508,13 +508,67 @@ public class RepositoryTest {
         Repository.status();
     }
 
+    // @Test
+    // /** Test no reson to rm */
+    // public void testNoRm() {
+    // removeFoler(Repository.GITLET_DIR);
+
+    // Repository.init();
+    // Repository.rm("test.txt");
+    // }
+
     @Test
-    /** Test no reson to rm */
-    public void testNoRm() {
+    /** Test findSplitCommit */
+    public void testFindSplitCommit() {
         removeFoler(Repository.GITLET_DIR);
 
+        int nfile = 10;
+        File files[] = new File[nfile];
+        try {
+            for (int i = 0; i < nfile; i++) {
+                files[i] = new File("text" + i + ".txt");
+                writeContents(files[i], "text");
+                files[i].createNewFile();
+            }
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+
         Repository.init();
-        Repository.rm("test.txt");
+        Repository.add(files[0].getName());
+        Repository.commit("v1");
+        Repository.add(files[1].getName());
+        Repository.commit("split");
+        Repository.branch("other");
+        Repository.branch("split1");
+
+        for (int i = 2; i < 7; i++) {
+            if (i == 5) {
+                Repository.branch("before");
+                Repository.branch("split2");
+            }
+            Repository.add(files[i].getName());
+            Repository.commit("v" + i);
+        }
+
+        Repository.checkoutBranch("other");
+        for (int i = 7; i < 10; i++) {
+            Repository.add(files[i].getName());
+            Repository.commit("v" + i);
+        }
+
+        // check before--master
+        Commit before = Branch.fromFile("before").dereference();
+        Commit master = Branch.fromFile("master").dereference();
+        Commit split2 = Branch.fromFile("split2").dereference();
+        Commit split = Repository.findSplitCommit(before, master);
+        assertEquals("Should be the same", split.getId(), split2.getId());
+
+        // check master--other
+        Commit other = Branch.fromFile("other").dereference();
+        Commit split1 = Branch.fromFile("split1").dereference();
+        split = Repository.findSplitCommit(master, other);
+        assertEquals("Should be the same", split.getId(), split1.getId());
     }
 
     private static void removeFoler(File file) {

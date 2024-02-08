@@ -102,4 +102,15 @@ public class Branch implements Dumpable {
     public void dump() {
         System.out.println(toString());
     }
+
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (o == null || o.getClass() != this.getClass()) {
+            return false;
+        }
+        Branch other = (Branch) o;
+        return this.name.equals(other.name);
+    }
 }

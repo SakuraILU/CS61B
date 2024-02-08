@@ -127,6 +127,14 @@ public class Main {
                 Repository.reset(commitId);
                 break;
             }
+            case "merge": {
+                // handle the `merge [branch name]` command
+                validateArgs(args, 2);
+
+                String branchName = args[1];
+                Repository.merge(branchName);
+                break;
+            }
             default: {
                 MyUtils.exit("No command with that name exists.");
                 break;
