@@ -8,19 +8,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 
 public class ObjectTest {
     @Test
     /** create file, fromFile, saveBlob, getId and getContentAsString */
-    public void testBlobSimple() {
+    public void testBlobSimple() throws IOException {
         String contents = "Hello, world!\n Hello, java!\n\n Hello, gitlet!\n";
         // create file
         File file = new File("test.txt");
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
         writeContents(file, contents);
         // create Blob
         Blob blob = new Blob(file);
@@ -43,7 +40,7 @@ public class ObjectTest {
 
     @Test
     /** Test file creation, fromFile, saveCommit, getId and getMessage */
-    public void testCommitSimple() {
+    public void testCommitSimple() throws IOException {
         List<String> parents = new LinkedList<String>();
         Map<String, String> trackedFiles = new HashMap<String, String>();
 
@@ -63,7 +60,7 @@ public class ObjectTest {
 
     @Test
     /** Test file creation, fromFile, saveCommit, getId and getMessage */
-    public void testCommit() {
+    public void testCommit() throws IOException {
         List<String> parents = new LinkedList<String>();
         for (int i = 0; i < 2; i++) {
             parents.add("commit_id" + i);
@@ -102,16 +99,12 @@ public class ObjectTest {
 
     @Test
     /** Test add files and Stage */
-    public void testStage() {
+    public void testStage() throws IOException {
         // create several files
         List<File> files = new LinkedList<File>();
         for (int i = 0; i < 10; i++) {
             File file = new File("test" + i + ".txt");
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            file.createNewFile();
             writeContents(file, "Hello, world!\n Hello, java!\n\n Hello, gitlet!\n");
             files.add(file);
         }
@@ -149,16 +142,12 @@ public class ObjectTest {
 
     @Test
     /** Test add, remove files and Stage */
-    public void testStageAddRemove() {
+    public void testStageAddRemove() throws IOException {
         // create several files
         List<File> files = new LinkedList<File>();
         for (int i = 0; i < 10; i++) {
             File file = new File("test" + i + ".txt");
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            file.createNewFile();
             writeContents(file, "Hello, world!\n Hello, java!\n\n Hello, gitlet!\n");
             files.add(file);
         }
@@ -188,18 +177,14 @@ public class ObjectTest {
 
     @Test
     /** add, commit, add more, remove, check stage */
-    public void testStageCommit() {
+    public void testStageCommit() throws IOException {
         int files_num = 10;
 
         // create several files
         List<File> files = new LinkedList<File>();
         for (int i = 0; i < files_num; i++) {
             File file = new File("test" + i + ".txt");
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            file.createNewFile();
             writeContents(file, "Hello, world!\n Hello, java!\n\n Hello, gitlet!\n");
             files.add(file);
         }
@@ -219,11 +204,7 @@ public class ObjectTest {
         List<File> files_more = new LinkedList<File>();
         for (int i = 0; i < files_num; i++) {
             File file = new File("test_more" + i + ".txt");
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            file.createNewFile();
             writeContents(file, "Hello, world!\n Hello, java!\n\n Hello, gitlet!\n");
             files_more.add(file);
         }
@@ -249,7 +230,8 @@ public class ObjectTest {
         // assert removedFileNames should be the left half of files
         assertEquals("Should be the same", files_num / 2, stage2.getRemovedFileNames().size());
         for (int i = 0; i < files_more.size() / 2; i++) {
-            assertTrue("Should contain", stage2.getRemovedFileNames().contains("test" + i + ".txt"));
+            assertTrue("Should contain",
+                    stage2.getRemovedFileNames().contains("test" + i + ".txt"));
         }
 
         // assert trackedFiles should be the files

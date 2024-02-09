@@ -6,24 +6,20 @@ import static gitlet.Utils.readObject;
 import static gitlet.Utils.sha1;
 import static gitlet.Utils.writeObject;
 
-// TODO: any imports you need here
-
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Represents a gitlet commit object.
- * TODO: It's a good idea to give a description here of what else this Class
+ * It's a good idea to give a description here of what else this Class
  * does at a high level.
  *
- * @author TODO
  */
 public class Commit implements Dumpable {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
@@ -41,8 +37,6 @@ public class Commit implements Dumpable {
     private final String id;
     /** The object file */
     private final File file;
-
-    /* TODO: fill in the rest of this class. */
 
     /**
      * defualt construct, used to create the first commit.
@@ -90,15 +84,11 @@ public class Commit implements Dumpable {
     /**
      * Save the Commit instance to a object file.
      */
-    public void saveCommit() {
+    public void saveCommit() throws IOException {
         // if the parent directory does not exist, create it
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            file.createNewFile();
         }
 
         writeObject(file, this);
@@ -210,6 +200,7 @@ public class Commit implements Dumpable {
         System.out.println(this);
     }
 
+    @Override
     public boolean equals(Object other) {
         if (other == null) {
             return false;

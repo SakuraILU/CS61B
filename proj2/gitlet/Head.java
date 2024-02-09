@@ -4,7 +4,7 @@ import java.io.File;
 
 public class Head implements Dumpable {
     /** The file that stores the head reference. */
-    private static final File file = Repository.HEAD_FILE;
+    private static final File FILE = Repository.HEAD_FILE;
     /** The head reference */
     private String branchName;
 
@@ -30,23 +30,23 @@ public class Head implements Dumpable {
      * @return Head instance
      */
     public static Head fromFile() {
-        return Utils.readObject(file, Head.class);
+        return Utils.readObject(FILE, Head.class);
     }
 
     /**
      * Save the head reference to a Object File
      */
     public void saveHead() {
-        Utils.writeObject(file, this);
+        Utils.writeObject(FILE, this);
     }
 
     /**
      * Change the branch that the head refers to.
      * 
-     * @param branchName the name of the branch that the head refers to.
+     * @param name the name of the branch that the head refers to.
      */
-    public void referTo(String branchName) {
-        this.branchName = branchName;
+    public void referTo(String name) {
+        this.branchName = name;
     }
 
     /**

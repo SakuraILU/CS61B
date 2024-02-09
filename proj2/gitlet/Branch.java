@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Branch implements Dumpable {
     /** The name of the reference. */
@@ -22,14 +23,10 @@ public class Branch implements Dumpable {
         this.commitId = commitId;
     }
 
-    public void saveBranch() {
+    public void saveBranch() throws IOException {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            file.createNewFile();
         }
 
         Utils.writeObject(file, this);
@@ -51,10 +48,10 @@ public class Branch implements Dumpable {
      * Change the id that the reference refers to.
      * 
      * @param name the name of the reference.
-     * @param id   the id that the reference refers to.
+     * @param id   the commit id that the reference refers to.
      */
-    public void referTo(String commitId) {
-        this.commitId = commitId;
+    public void referTo(String id) {
+        this.commitId = id;
     }
 
     /**
@@ -103,6 +100,7 @@ public class Branch implements Dumpable {
         System.out.println(toString());
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -112,5 +110,10 @@ public class Branch implements Dumpable {
         }
         Branch other = (Branch) o;
         return this.name.equals(other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
     }
 }

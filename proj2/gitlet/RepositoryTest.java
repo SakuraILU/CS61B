@@ -11,17 +11,13 @@ import static org.junit.Assert.*;
 public class RepositoryTest {
     @Test
     /** Test init and add */
-    public void testInitAdd() {
+    public void testInitAdd() throws IOException {
         // remove the .gitlet folder
         removeFoler(Repository.GITLET_DIR);
 
         // create a file
         File file = new File("test.txt");
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
 
         Repository.init();
         Repository.add(file.getName());
@@ -35,50 +31,42 @@ public class RepositoryTest {
     }
 
     @Test
-    public void testInitMultAdd() {
+    public void testInitMultAdd() throws IOException {
         // remove the .gitlet folder
         removeFoler(Repository.GITLET_DIR);
 
         // create several files
-        int files_num = 10;
-        File[] files = new File[files_num];
-        for (int i = 0; i < files_num; i++) {
+        int fileNum = 10;
+        File[] files = new File[fileNum];
+        for (int i = 0; i < fileNum; i++) {
             files[i] = new File("test" + i + ".txt");
-            try {
-                files[i].createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            files[i].createNewFile();
         }
 
         Repository.init();
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.add(files[i].getName());
         }
 
         // check stage
         Stage stage = Stage.fromFile();
-        assertEquals("Should be the same", files_num, stage.getAddedFiles().size());
+        assertEquals("Should be the same", fileNum, stage.getAddedFiles().size());
 
         // delete the files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             files[i].delete();
         }
     }
 
     @Test
     /** Test init, add, commit */
-    public void testInitAddCommit() {
+    public void testInitAddCommit() throws IOException {
         // remove the .gitlet folder
         removeFoler(Repository.GITLET_DIR);
 
         // create a file
         File file = new File("test.txt");
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
 
         Repository.init();
         Repository.add(file.getName());
@@ -102,19 +90,15 @@ public class RepositoryTest {
 
     @Test
     /** Test add, remove, commit */
-    public void testAddRmCommit() {
+    public void testAddRmCommit() throws IOException {
         // remove the .gitlet folder
         removeFoler(Repository.GITLET_DIR);
 
         // create two files
         File file1 = new File("test1.txt");
         File file2 = new File("test2.txt");
-        try {
-            file1.createNewFile();
-            file2.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file1.createNewFile();
+        file2.createNewFile();
 
         Repository.init();
         Repository.add(file1.getName());
@@ -142,46 +126,38 @@ public class RepositoryTest {
 
     @Test
     /** Test add, commit, add more, remove untrackedFiles */
-    public void testAddCommitAddRmUntracked() {
+    public void testAddCommitAddRmUntracked() throws IOException {
         // remove the .gitlet folder
         removeFoler(Repository.GITLET_DIR);
 
         // create several files
-        int files_num = 10;
-        File[] files = new File[files_num];
-        for (int i = 0; i < files_num; i++) {
+        int fileNum = 10;
+        File[] files = new File[fileNum];
+        for (int i = 0; i < fileNum; i++) {
             files[i] = new File("test" + i + ".txt");
-            try {
-                files[i].createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            files[i].createNewFile();
         }
 
         Repository.init();
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.add(files[i].getName());
         }
 
         Repository.commit("commit");
 
         // create more files
-        File[] files2 = new File[files_num];
-        for (int i = 0; i < files_num; i++) {
+        File[] files2 = new File[fileNum];
+        for (int i = 0; i < fileNum; i++) {
             files2[i] = new File("test_more" + i + ".txt");
-            try {
-                files2[i].createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            files2[i].createNewFile();
         }
 
         // add the files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.add(files2[i].getName());
         }
         // remove these untracked files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.rm(files2[i].getName());
         }
 
@@ -189,22 +165,22 @@ public class RepositoryTest {
         Stage stage = Stage.fromFile();
         assertEquals("Should be the same", 0, stage.getAddedFiles().size());
         assertEquals("Should be the same", 0, stage.getRemovedFileNames().size());
-        assertEquals("Should be the same", files_num, stage.getTrackedFiles().size());
+        assertEquals("Should be the same", fileNum, stage.getTrackedFiles().size());
 
         // check commit
         Head head = Head.fromFile();
         Branch branch = Branch.fromFile(head.getBranchName());
         Commit commit = branch.dereference();
         assertEquals("Should be the same", "commit", commit.getMessage());
-        assertEquals("Should be the same", files_num, commit.getTrackedFiles().size());
+        assertEquals("Should be the same", fileNum, commit.getTrackedFiles().size());
 
         // this untrackedFiles shouldn't be removed
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             assertTrue("Should be the same", new File(files2[i].getName()).exists());
         }
 
         // delete the files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             files[i].delete();
             files2[i].delete();
         }
@@ -212,39 +188,35 @@ public class RepositoryTest {
 
     @Test
     /** Test add, commit, remove trackedFiles */
-    public void testAddCommitRmTracked() {
+    public void testAddCommitRmTracked() throws IOException {
         // remove the .gitlet folder
         removeFoler(Repository.GITLET_DIR);
 
         // create several files
-        int files_num = 10;
-        File[] files = new File[files_num];
-        for (int i = 0; i < files_num; i++) {
+        int fileNum = 10;
+        File[] files = new File[fileNum];
+        for (int i = 0; i < fileNum; i++) {
             files[i] = new File("test" + i + ".txt");
-            try {
-                files[i].createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            files[i].createNewFile();
         }
 
         Repository.init();
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.add(files[i].getName());
         }
 
         Repository.commit("commit");
 
         // remove the files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.rm(files[i].getName());
         }
 
         // check stage
         Stage stage = Stage.fromFile();
         assertEquals("Should be the same", 0, stage.getAddedFiles().size());
-        assertEquals("Should be the same", files_num, stage.getRemovedFileNames().size());
-        assertEquals("Should be the same", files_num, stage.getTrackedFiles().size());
+        assertEquals("Should be the same", fileNum, stage.getRemovedFileNames().size());
+        assertEquals("Should be the same", fileNum, stage.getTrackedFiles().size());
 
         // check commit
         Head head = Head.fromFile();
@@ -254,25 +226,21 @@ public class RepositoryTest {
         assertEquals("Should be the same", 10, commit.getTrackedFiles().size());
 
         // this trackedFiles should be removed
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             assertFalse("Should be the same", new File(files[i].getName()).exists());
         }
     }
 
     @Test
     /** Test add, commit, modify file and checkout file */
-    public void testCheckoutFile() {
+    public void testCheckoutFile() throws IOException {
         removeFoler(Repository.GITLET_DIR);
 
         String str1 = "hello, java";
         String str2 = "hello, python";
         // create a file with contents "java"
         File file = new File("test.txt");
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
         writeContents(file, str1);
 
         Repository.init();
@@ -292,18 +260,14 @@ public class RepositoryTest {
 
     @Test
     /** Test add, commit, modify file and checkout file with commit id */
-    public void testCheckoutFileWithCommitId() {
+    public void testCheckoutFileWithCommitId() throws IOException {
         removeFoler(Repository.GITLET_DIR);
 
         String str1 = "hello, java";
         String str2 = "hello, python";
         // create a file with contents "java"
         File file = new File("test.txt");
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
         writeContents(file, str1);
 
         Repository.init();
@@ -332,23 +296,19 @@ public class RepositoryTest {
      * Test add several files, commit, branch, add more files, remove origin files,
      * commit and checkout branch
      */
-    public void testCheckoutBranch() {
+    public void testCheckoutBranch() throws IOException {
         removeFoler(Repository.GITLET_DIR);
 
         // create several files
-        int files_num = 10;
-        File[] files = new File[files_num];
-        for (int i = 0; i < files_num; i++) {
+        int fileNum = 10;
+        File[] files = new File[fileNum];
+        for (int i = 0; i < fileNum; i++) {
             files[i] = new File("test" + i + ".txt");
-            try {
-                files[i].createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            files[i].createNewFile();
         }
 
         Repository.init();
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.add(files[i].getName());
         }
 
@@ -358,22 +318,18 @@ public class RepositoryTest {
         Repository.branch("branch");
 
         // create more files
-        File[] files2 = new File[files_num];
-        for (int i = 0; i < files_num; i++) {
+        File[] files2 = new File[fileNum];
+        for (int i = 0; i < fileNum; i++) {
             files2[i] = new File("test_more" + i + ".txt");
-            try {
-                files2[i].createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            files2[i].createNewFile();
         }
 
         // add the files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.add(files2[i].getName());
         }
         // remove these untracked files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             Repository.rm(files[i].getName());
         }
 
@@ -388,16 +344,16 @@ public class RepositoryTest {
         assertEquals("Should be the same", 0, stage.getAddedFiles().size());
 
         // check the files1 are exist
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             assertTrue("Should be recovered", new File(files[i].getName()).exists());
         }
         // files2 are removed
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             assertFalse("Should be removed", new File(files2[i].getName()).exists());
         }
 
         // delete the files
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             files[i].delete();
             files2[i].delete();
         }
@@ -405,7 +361,7 @@ public class RepositoryTest {
 
     @Test
     /** Test branch and rm-branch */
-    public void testBranchSimple() {
+    public void testBranchSimple() throws IOException {
         removeFoler(Repository.GITLET_DIR);
 
         // create a branch
@@ -426,7 +382,7 @@ public class RepositoryTest {
      * *********|--- commit3 (other)
      * commit1---->commit2 (master)
      */
-    public void testBranchCheckout() {
+    public void testBranchCheckout() throws IOException {
         removeFoler(Repository.GITLET_DIR);
 
         String str1 = "this is java";
@@ -438,18 +394,10 @@ public class RepositoryTest {
 
         // create two file
         File file = new File("test.txt");
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
         writeContents(file, str1);
         File file2 = new File("test2.txt");
-        try {
-            file2.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file2.createNewFile();
         writeContents(file2, str1);
 
         Repository.add(file.getName());
@@ -460,11 +408,7 @@ public class RepositoryTest {
         Repository.checkoutBranch("other");
 
         // create file
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
         writeContents(file, str2);
 
         Repository.add(file.getName());
@@ -490,16 +434,12 @@ public class RepositoryTest {
 
     @Test
     /** Test add and status */
-    public void testAddStatus() {
+    public void testAddStatus() throws IOException {
         removeFoler(Repository.GITLET_DIR);
 
         // create a file
         File file = new File("test.txt");
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        file.createNewFile();
 
         Repository.init();
         Repository.add(file.getName());
@@ -519,19 +459,15 @@ public class RepositoryTest {
 
     @Test
     /** Test findSplitCommit */
-    public void testFindSplitCommit() {
+    public void testFindSplitCommit() throws IOException {
         removeFoler(Repository.GITLET_DIR);
 
         int nfile = 10;
         File files[] = new File[nfile];
-        try {
-            for (int i = 0; i < nfile; i++) {
-                files[i] = new File("text" + i + ".txt");
-                writeContents(files[i], "text");
-                files[i].createNewFile();
-            }
-        } catch (IOException e) {
-            System.err.println(e);
+        for (int i = 0; i < nfile; i++) {
+            files[i] = new File("text" + i + ".txt");
+            writeContents(files[i], "text");
+            files[i].createNewFile();
         }
 
         Repository.init();
@@ -561,13 +497,13 @@ public class RepositoryTest {
         Commit before = Branch.fromFile("before").dereference();
         Commit master = Branch.fromFile("master").dereference();
         Commit split2 = Branch.fromFile("split2").dereference();
-        Commit split = Repository.findSplitCommit(before, master);
+        Commit split = MyUtils.splitCommitOf(before, master);
         assertEquals("Should be the same", split.getId(), split2.getId());
 
         // check master--other
         Commit other = Branch.fromFile("other").dereference();
         Commit split1 = Branch.fromFile("split1").dereference();
-        split = Repository.findSplitCommit(master, other);
+        split = MyUtils.splitCommitOf(master, other);
         assertEquals("Should be the same", split.getId(), split1.getId());
     }
 

@@ -4,6 +4,7 @@ import static gitlet.Utils.*;
 import static gitlet.MyUtils.*;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Blob implements Dumpable {
     /** The contents of this Blob */
@@ -47,15 +48,11 @@ public class Blob implements Dumpable {
     /**
      * Save the Blob instance to a Object File
      */
-    public void saveBlob() {
+    public void saveBlob() throws IOException {
         // if the parent directory does not exist, create it
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            try {
-                file.createNewFile();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            file.createNewFile();
         }
 
         writeObject(file, this);

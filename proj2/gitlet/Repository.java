@@ -4,23 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static gitlet.MyUtils.differenceSet;
-import static gitlet.MyUtils.unionSet;
+import static gitlet.MyUtils.*;
 import static gitlet.Utils.*;
-
-// TODO: any imports you need here
 
 /**
  * Represents a gitlet repository.
- * TODO: It's a good idea to give a description here of what else this Class
+ * It's a good idea to give a description here of what else this Class
  * does at a high level.
  *
- * @author TODO
+ * @author Keyu Liu
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
@@ -52,10 +47,10 @@ public class Repository {
     /** The stage */
     public static final File STAGE_FILE = join(GITLET_DIR, "stage");
 
-    /* TODO: fill in the rest of this class. */
-    public static void init() {
+    public static void init() throws IOException {
         if (isInitialized()) {
-            MyUtils.exit("A Gitlet version-control system already exists in the current directory.");
+            MyUtils.exit("A Gitlet version-control system already "
+                    + "exists in the current directory.");
         }
 
         GITLET_DIR.mkdirs();
@@ -68,10 +63,10 @@ public class Repository {
             e.printStackTrace();
         }
 
-        Commit first_commit = new Commit();
-        first_commit.saveCommit();
+        Commit firstCommit = new Commit();
+        firstCommit.saveCommit();
 
-        Branch master = new Branch("master", first_commit.getId());
+        Branch master = new Branch("master", firstCommit.getId());
         master.saveBranch();
 
         Head head = new Head("master");
@@ -95,7 +90,7 @@ public class Repository {
      * 
      * @param file the file to be added.
      */
-    public static void add(String fileName) {
+    public static void add(String fileName) throws IOException {
         File file = new File(fileName);
         if (!file.exists()) {
             MyUtils.exit("File does not exist.");
@@ -126,7 +121,7 @@ public class Repository {
      * 
      * @param message the commit message.
      */
-    public static void commit(String message) {
+    public static void commit(String message) throws IOException {
         if (message == null || message.length() == 0) {
             MyUtils.exit("Please enter a commit message.");
         }
@@ -175,7 +170,7 @@ public class Repository {
      * Global log the commit history.
      */
     public static void globalLog() {
-        Set<Commit> commits = findAllCommits();
+        Set<Commit> commits = MyUtils.commits();
         for (Commit commit : commits) {
             System.out.println("===");
             System.out.println(commit);
@@ -190,7 +185,7 @@ public class Repository {
     public static void find(String message) {
         boolean findCommit = false;
 
-        Set<Commit> commits = findAllCommits();
+        Set<Commit> commits = MyUtils.commits();
         for (Commit commit : commits) {
             if (commit.getMessage().equals(message)) {
                 System.out.println(commit.getId());
@@ -205,7 +200,7 @@ public class Repository {
 
     public static void status() {
         Branch curBranch = currentBranch();
-        Set<Branch> branches = findAllBranches();
+        Set<Branch> branches = MyUtils.branches();
         System.out.println("=== Branches ===");
         System.out.printf("*%s\n", curBranch.getBranchName());
         for (Branch branch : branches) {
@@ -236,7 +231,7 @@ public class Repository {
         System.out.println();
 
         System.out.println("=== Untracked Files ===");
-        Set<String> untrackedFileNames = findAllUntrackedFileNames();
+        Set<String> untrackedFileNames = MyUtils.untrackedFileNames();
         for (String fileName : untrackedFileNames) {
             System.out.println(fileName);
         }
@@ -272,10 +267,10 @@ public class Repository {
      * @param branchName the branch name.
      */
     public static void checkoutBranch(String branchName) {
-        Branch branch = Branch.fromFile(branchName);
-        if (branch.equals(currentBranch())) {
+        if (MyUtils.isCurrentBranch(branchName)) {
             MyUtils.exit("No need to checkout the current branch.");
         }
+        Branch branch = Branch.fromFile(branchName);
         Commit commit = branch.dereference();
         checkoutCommit(commit);
 
@@ -290,7 +285,7 @@ public class Repository {
      * 
      * @param commitId the commit id.
      */
-    public static void reset(String commitId) {
+    public static void reset(String commitId) throws IOException {
         Commit reseCommit = Commit.fromFile(commitId);
         checkoutCommit(reseCommit);
 
@@ -313,11 +308,12 @@ public class Repository {
         Set<String> curTrackedFileNames = curCommit.getTrackedFileNames();
         Set<String> otherTrackedFileNames = otherCommit.getTrackedFileNames();
 
-        Set<String> unTrackedFileNames = findAllUntrackedFileNames();
+        Set<String> unTrackedFileNames = MyUtils.untrackedFileNames();
 
         // check if the checkout will overwrite the files
         if (MyUtils.intersectionSet(otherTrackedFileNames, unTrackedFileNames).size() > 0) {
-            MyUtils.exit("There is an untracked file in the way; delete it, or add and commit it first.");
+            MyUtils.exit("There is an untracked file in the way; delete it, "
+                    + "or add and commit it first.");
         }
 
         // checkout all the files in the given branch
@@ -328,8 +324,9 @@ public class Repository {
 
         // remove all the trakced files in current commit that are not present in the
         // given branch
-        Set<String> unOverwritedTrackedFileNames = differenceSet(curTrackedFileNames, otherTrackedFileNames);
-        for (String fileName : unOverwritedTrackedFileNames) {
+        Set<String> unoverwritedTrackedFileNames = differenceSet(
+                curTrackedFileNames, otherTrackedFileNames);
+        for (String fileName : unoverwritedTrackedFileNames) {
             File file = new File(fileName);
             file.delete();
         }
@@ -358,7 +355,7 @@ public class Repository {
 
         String blobId = trakcedFiles.get(fileName);
         Blob blob = Blob.fromFile(blobId);
-        byte contents[] = blob.getContents();
+        byte[] contents = blob.getContents();
 
         writeContents(file, contents);
     }
@@ -368,9 +365,8 @@ public class Repository {
      * 
      * @param branchName the branch name.
      */
-    public static void branch(String branchName) {
-        File file = new File(REFS_DIR, branchName);
-        if (file.exists()) {
+    public static void branch(String branchName) throws IOException {
+        if (MyUtils.branchExists(branchName)) {
             MyUtils.exit("A branch with that name already exists.");
         }
 
@@ -385,15 +381,12 @@ public class Repository {
      * @param branchName the branch name.
      */
     public static void rmBranch(String branchName) {
-        // cannot remove the current branch
-        Branch curBranch = currentBranch();
-        if (branchName.equals(curBranch.getBranchName())) {
-            MyUtils.exit("Cannot remove the current branch.");
-        }
-        // cannot remove a branch that does not exist
-        File file = new File(REFS_DIR, branchName);
-        if (!file.exists()) {
+        if (!MyUtils.branchExists(branchName)) {
             MyUtils.exit("A branch with that name does not exist.");
+        }
+
+        if (MyUtils.isCurrentBranch(branchName)) {
+            MyUtils.exit("Cannot remove the current branch.");
         }
 
         Branch branch = Branch.fromFile(branchName);
@@ -401,316 +394,36 @@ public class Repository {
     }
 
     /**
-     * Get the current branch.
-     * 
-     * @return the current branch.
-     */
-    private static Branch currentBranch() {
-        Head head = Head.fromFile();
-        Branch branch = head.dereference();
-        return branch;
-    }
-
-    /**
-     * Get the current commit.
-     * 
-     * @return the current commit.
-     */
-    private static Commit currentCommit() {
-        Branch branch = currentBranch();
-        Commit curCommit = branch.dereference();
-        return curCommit;
-    }
-
-    /**
-     * Find all branches in the repository
-     * 
-     * @return all branches in the repository
-     */
-    public static Set<Branch> findAllBranches() {
-        List<String> branchNames = plainFilenamesIn(Repository.REFS_DIR);
-        Set<Branch> branches = new HashSet<Branch>();
-
-        for (String branchName : branchNames) {
-            Branch branch = Branch.fromFile(branchName);
-            branches.add(branch);
-        }
-
-        return branches;
-    }
-
-    /**
-     * Find all commits in the repository.
-     *
-     * @return all commits in the repository.
-     */
-    private static Set<Commit> findAllCommits() {
-        // Search commit files in the objects directory
-        List<String> commitIds = plainFilenamesIn(Repository.OBJECTS_DIR);
-        Set<Commit> commits = new HashSet<Commit>();
-        for (String commitId : commitIds) {
-            Commit commit = Commit.fromFile(commitId);
-            commits.add(Commit.fromFile(commit.getId()));
-        }
-
-        return commits;
-    }
-
-    /**
-     * Find all untracked file names in the current working directory.
-     * 
-     * @return all untracked file names in the current working directory.
-     */
-    private static Set<String> findAllUntrackedFileNames() {
-        Set<String> allFileNames = findAllFileNames(CWD);
-        Set<String> trackedFileNames = new HashSet<String>();
-
-        Stage stage = Stage.fromFile();
-        trackedFileNames.addAll(stage.getTrackedFiles().keySet());
-
-        Set<String> addedFileNames = stage.getAddedFileNames();
-        Set<String> removedFileNames = stage.getRemovedFileNames();
-        trackedFileNames.addAll(addedFileNames);
-        trackedFileNames.removeAll(removedFileNames);
-
-        return differenceSet(allFileNames, trackedFileNames);
-    }
-
-    /**
-     * Find all file names in the given file.
-     * 
-     * @param file the file.
-     * @return all file names in the given file.
-     */
-    private static Set<String> findAllFileNames(File file) {
-        Set<String> fileNames = new HashSet<String>();
-        // ignore the .gitlet directory
-        if (file.equals(GITLET_DIR)) {
-            return fileNames;
-        }
-
-        if (file.isFile()) {
-            fileNames.add(file.getName());
-            return fileNames;
-        } else {
-            List<String> fileOrDirNames = plainFilenamesIn(file);
-            for (String name : fileOrDirNames) {
-                File subFile = join(file, name);
-                fileNames.addAll(findAllFileNames(subFile));
-            }
-        }
-
-        return fileNames;
-    }
-
-    /**
      * Merge the branch with the given branch name.
      * 
      * @param branchName the branch name.
      */
-    public static void merge(String branchName) {
+    public static void merge(String branchName) throws IOException {
+        checkMerge(branchName);
+
+        Branch otheBranch = Branch.fromFile(branchName);
+        MergeHandler.merge(otheBranch);
+    }
+
+    /**
+     * Check if the merge is valid.
+     * 
+     * @return true if the merge is valid, false otherwise.
+     */
+    private static boolean checkMerge(String branchName) {
         Stage stage = Stage.fromFile();
         if (!stage.isEmpty()) {
             MyUtils.exit("You have uncommitted changes.");
         }
 
-        File file = join(REFS_DIR, branchName);
-        if (!file.exists()) {
+        if (!MyUtils.branchExists(branchName)) {
             MyUtils.exit("A branch with that name does not exist.");
         }
-        Branch branch = Branch.fromFile(branchName);
-        if (branch.equals(currentBranch())) {
+        if (MyUtils.isCurrentBranch(branchName)) {
             MyUtils.exit("Cannot merge a branch with itself.");
         }
 
-        Commit curCommit = currentCommit();
-        Commit otherCommit = branch.dereference();
-        Commit splitCommit = findSplitCommit(curCommit, otherCommit);
-
-        // check if the split commit is the same as the given branch
-        if (splitCommit.equals(otherCommit)) {
-            MyUtils.exit("Given branch is an ancestor of the current branch.");
-        }
-        // check if the split commit is the same as the current branch
-        if (splitCommit.equals(curCommit)) {
-            checkoutBranch(branchName);
-            MyUtils.exit("Current branch fast-forwarded.");
-        }
-
-        Map<String, String> curFiles = curCommit.getTrackedFiles();
-        Map<String, String> otherFiles = otherCommit.getTrackedFiles();
-        Map<String, String> splitFiles = splitCommit.getTrackedFiles();
-        Set<String> allFiles = unionSet(curFiles.keySet(), otherFiles.keySet());
-
-        Map<String, String> mergedFiles = new HashMap<String, String>();
-        Set<String> removedFileNames = new HashSet<String>();
-        Map<String, String> conflictFiles = new HashMap<String, String>();
-
-        boolean conflict = false;
-        for (String fileName : allFiles) {
-            if (curFiles.containsKey(fileName) && otherFiles.containsKey(fileName)) {
-                String curBlobId = curFiles.get(fileName);
-                String otherBlobId = otherFiles.get(fileName);
-                if (curBlobId.equals(otherBlobId)) {
-                    mergedFiles.put(fileName, curBlobId);
-                } else {
-                    if (!splitFiles.containsKey(fileName)) {
-                        // handle conflict
-                        conflict = true;
-                        String contents = conflictContents(fileName, curBlobId, otherBlobId);
-                        conflictFiles.put(fileName, contents);
-                    } else {
-                        String splitBlobId = splitFiles.get(fileName);
-                        if (splitBlobId.equals(otherBlobId) && !splitBlobId.equals(curBlobId)) {
-                            mergedFiles.put(fileName, curBlobId);
-                        } else if (splitBlobId.equals(curBlobId) && !splitBlobId.equals(otherBlobId)) {
-                            mergedFiles.put(fileName, otherBlobId);
-                        } else {
-                            // handle conflict
-                            conflict = true;
-                            String contents = conflictContents(fileName, curBlobId, otherBlobId);
-                            conflictFiles.put(fileName, contents);
-                        }
-                    }
-                }
-            } else if (curFiles.containsKey(fileName) && !otherFiles.containsKey(fileName)) {
-                if (!splitFiles.containsKey(fileName)) {
-                    String curBlobId = curFiles.get(fileName);
-                    mergedFiles.put(fileName, curBlobId);
-                } else {
-                    String curBlobId = curFiles.get(fileName);
-                    String splitBlobId = splitFiles.get(fileName);
-                    if (splitBlobId.equals(curBlobId)) {
-                        // remove this file
-                        removedFileNames.add(fileName);
-                    } else {
-                        // handle conflict
-                        conflict = true;
-                        String contents = conflictContents(fileName, curBlobId, "");
-                        conflictFiles.put(fileName, contents);
-                    }
-                }
-            } else {
-                if (!splitFiles.containsKey(fileName)) {
-                    String otherBlobId = otherFiles.get(fileName);
-                    mergedFiles.put(fileName, otherBlobId);
-                } else {
-                    String otherBlobId = otherFiles.get(fileName);
-                    String splitBlobId = splitFiles.get(fileName);
-                    if (splitBlobId.equals(otherBlobId)) {
-                        // nothing to do
-                    } else {
-                        // handle conflict
-                        conflict = true;
-                        String contents = conflictContents(fileName, "", otherBlobId);
-                        conflictFiles.put(fileName, contents);
-                    }
-                }
-            }
-        }
-
-        // check if there are untracked files are overwritten
-        Set<String> untrackedFileNames = findAllUntrackedFileNames();
-        Set<String> allMergedFileNames = unionSet(mergedFiles.keySet(), conflictFiles.keySet());
-        if (MyUtils.intersectionSet(allMergedFileNames, untrackedFileNames).size() > 0) {
-            MyUtils.exit("There is an untracked file in the way; delete it, or add and commit it first.");
-        }
-
-        // print the conflict message
-        if (conflict) {
-            System.out.println("Encountered a merge conflict.");
-        }
-        // write conflict contents to file and blob
-        for (String fileName : conflictFiles.keySet()) {
-            File fileToWrite = new File(fileName);
-            String contents = conflictFiles.get(fileName);
-            writeContents(fileToWrite, contents.getBytes());
-
-            Blob blob = new Blob(fileToWrite);
-            blob.saveBlob();
-            mergedFiles.put(fileName, blob.getId());
-        }
-        // checkout merged files
-        for (String fileName : mergedFiles.keySet()) {
-            String blobId = mergedFiles.get(fileName);
-            Blob blob = Blob.fromFile(blobId);
-            byte contents[] = blob.getContents();
-            File fileToWrite = new File(fileName);
-            writeContents(fileToWrite, contents);
-        }
-
-        // delete files
-        for (String fileName : removedFileNames) {
-            File fileToRemove = new File(fileName);
-            fileToRemove.delete();
-        }
-
-        // create a new commit
-        Branch curBranch = currentBranch();
-        String message = String.format("Merged %s into %s.", branchName, curBranch.getBranchName());
-        LinkedList<String> parentIds = new LinkedList<String>();
-        parentIds.add(curCommit.getId());
-        parentIds.add(otherCommit.getId());
-        Commit commit = new Commit(message, parentIds, mergedFiles);
-        commit.saveCommit();
-
-        // update the current branch
-        curBranch.referTo(commit.getId());
-        curBranch.saveBranch();
-
-        // clear stage
-        stage.clearForCheckoutCommit(commit);
-        stage.saveStage();
-    }
-
-    /**
-     * Find the split point of the two commits.
-     * 
-     * @param commit1 the first commit.
-     * @param commit2 the second commit.
-     * @return the split commit.
-     */
-    public static Commit findSplitCommit(Commit commit1, Commit commit2) {
-        Set<Commit> prevCommits1 = findPrevCommits(commit1);
-        Set<Commit> prevCommits2 = findPrevCommits(commit2);
-
-        Set<Commit> commonCommit = MyUtils.intersectionSet(prevCommits1, prevCommits2);
-        Commit lcaCommit = null; // last common ancestor commit
-        for (Commit commit : commonCommit) {
-            if (lcaCommit == null || commit.dateAfter(lcaCommit)) {
-                lcaCommit = commit;
-            }
-        }
-
-        return lcaCommit;
-    }
-
-    public static Set<Commit> findPrevCommits(Commit commit) {
-        Set<Commit> commits = new HashSet<Commit>();
-        commits.add(commit);
-
-        for (String parentId : commit.getParentIds()) {
-            Commit parentCommit = Commit.fromFile(parentId);
-            commits.addAll(findPrevCommits(parentCommit));
-        }
-
-        return commits;
-    }
-
-    private static String conflictContents(String fileName, String curBlobId, String otherBlobId) {
-        String curContents = "";
-        if (!curBlobId.equals("")) {
-            Blob curBlob = Blob.fromFile(curBlobId);
-            curContents = new String(curBlob.getContents());
-        }
-        String otherContents = "";
-        if (!otherBlobId.equals("")) {
-            Blob otherBlob = Blob.fromFile(otherBlobId);
-            otherContents = new String(otherBlob.getContents());
-        }
-
-        String contents = String.format("<<<<<<< HEAD\n%s=======\n%s>>>>>>>\n", curContents, otherContents);
-        return contents;
+        return true;
     }
 
     /**

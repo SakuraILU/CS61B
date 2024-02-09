@@ -4,7 +4,7 @@ import static gitlet.Utils.readObject;
 import static gitlet.Utils.restrictedDelete;
 import static gitlet.Utils.writeObject;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 public class Stage implements Dumpable {
@@ -16,7 +16,7 @@ public class Stage implements Dumpable {
     /** The removed files */
     private Set<String> removedFileNames;
     /** The index file */
-    private static final File file = Repository.STAGE_FILE;
+    private static final File FILE = Repository.STAGE_FILE;
 
     public Stage() {
         this.addedFiles = new HashMap<String, String>();
@@ -30,14 +30,14 @@ public class Stage implements Dumpable {
      * @return the new stage
      */
     public static Stage fromFile() {
-        return readObject(file, Stage.class);
+        return readObject(FILE, Stage.class);
     }
 
     /**
      * Save the stage to the STAGE file.
      */
     public void saveStage() {
-        writeObject(file, this);
+        writeObject(FILE, this);
     }
 
     /**
@@ -46,7 +46,7 @@ public class Stage implements Dumpable {
      * @param file the file to add
      * @return true if the file was added, false otherwise
      */
-    public boolean addFile(File file) {
+    public boolean addFile(File file) throws IOException {
         boolean changed = false;
 
         Blob blob = new Blob(file);

@@ -136,7 +136,8 @@ class Utils {
             if (file.isDirectory()) {
                 throw new IllegalArgumentException("cannot overwrite directory");
             }
-            BufferedOutputStream str = new BufferedOutputStream(Files.newOutputStream(file.toPath()));
+            BufferedOutputStream str = new BufferedOutputStream(
+                    Files.newOutputStream(file.toPath()));
             for (Object obj : contents) {
                 if (obj instanceof byte[]) {
                     str.write((byte[]) obj);
