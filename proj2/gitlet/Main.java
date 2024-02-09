@@ -19,6 +19,14 @@ public class Main {
             MyUtils.exit("Please Enter a command");
         }
 
+        try {
+            excuteCmd(args);
+        } catch (IOException e) {
+            MyUtils.exit(e.getMessage());
+        }
+    }
+
+    private static void excuteCmd(String[] args) throws IOException {
         String command = args[0];
         // what if not in an initialized gitlet directory?
         if (!command.equals("init") && !Repository.isInitialized()) {
