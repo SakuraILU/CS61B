@@ -93,8 +93,10 @@ public class ObjectTest {
 
         Stage stage2 = Stage.fromFile();
 
-        assertEquals("Should be the same", stage.getAddedFiles(), stage2.getAddedFiles());
-        assertEquals("Should be the same", stage.getRemovedFileNames(), stage2.getRemovedFileNames());
+        assertEquals("Should be the same",
+                stage.getAddedFiles(), stage2.getAddedFiles());
+        assertEquals("Should be the same",
+                stage.getRemovedFileNames(), stage2.getRemovedFileNames());
     }
 
     @Test
@@ -122,9 +124,11 @@ public class ObjectTest {
         Stage stage2 = Stage.fromFile();
 
         // assert addedFiles
-        assertEquals("Should be the same", stage.getAddedFiles(), stage2.getAddedFiles());
+        assertEquals("Should be the same",
+                stage.getAddedFiles(), stage2.getAddedFiles());
         // assert removedFileNames
-        assertEquals("Should be the same", stage.getRemovedFileNames(), stage2.getRemovedFileNames());
+        assertEquals("Should be the same",
+                stage.getRemovedFileNames(), stage2.getRemovedFileNames());
 
         // assert trackedFiles with file lists
         stage2.commitChanges();
@@ -178,11 +182,11 @@ public class ObjectTest {
     @Test
     /** add, commit, add more, remove, check stage */
     public void testStageCommit() throws IOException {
-        int files_num = 10;
+        int fileNum = 10;
 
         // create several files
         List<File> files = new LinkedList<File>();
-        for (int i = 0; i < files_num; i++) {
+        for (int i = 0; i < fileNum; i++) {
             File file = new File("test" + i + ".txt");
             file.createNewFile();
             writeContents(file, "Hello, world!\n Hello, java!\n\n Hello, gitlet!\n");
@@ -201,19 +205,19 @@ public class ObjectTest {
         Map<String, String> trackedFiles = stage.getTrackedFiles();
 
         // add more files
-        List<File> files_more = new LinkedList<File>();
-        for (int i = 0; i < files_num; i++) {
+        List<File> filesMore = new LinkedList<File>();
+        for (int i = 0; i < fileNum; i++) {
             File file = new File("test_more" + i + ".txt");
             file.createNewFile();
             writeContents(file, "Hello, world!\n Hello, java!\n\n Hello, gitlet!\n");
-            files_more.add(file);
+            filesMore.add(file);
         }
-        for (File file : files_more) {
+        for (File file : filesMore) {
             stage.addFile(file);
         }
 
         // remove half of the files
-        for (int i = 0; i < files_more.size() / 2; i++) {
+        for (int i = 0; i < filesMore.size() / 2; i++) {
             stage.removeFile(files.get(i));
         }
         stage.saveStage();
@@ -221,21 +225,21 @@ public class ObjectTest {
         // fromFile
         Stage stage2 = Stage.fromFile();
 
-        // assert addedFiles should be files_more
-        assertEquals("Should be the same", files_more.size(), stage2.getAddedFiles().size());
-        for (File file : files_more) {
+        // assert addedFiles should be filesMore
+        assertEquals("Should be the same", filesMore.size(), stage2.getAddedFiles().size());
+        for (File file : filesMore) {
             assertTrue("Should contain", stage2.getAddedFiles().containsKey(file.getName()));
         }
 
         // assert removedFileNames should be the left half of files
-        assertEquals("Should be the same", files_num / 2, stage2.getRemovedFileNames().size());
-        for (int i = 0; i < files_more.size() / 2; i++) {
+        assertEquals("Should be the same", fileNum / 2, stage2.getRemovedFileNames().size());
+        for (int i = 0; i < filesMore.size() / 2; i++) {
             assertTrue("Should contain",
                     stage2.getRemovedFileNames().contains("test" + i + ".txt"));
         }
 
         // assert trackedFiles should be the files
-        assertEquals("Should be the same", files_num, trackedFiles.size());
+        assertEquals("Should be the same", fileNum, trackedFiles.size());
         for (File file : files) {
             assertTrue("Should contain", trackedFiles.containsKey(file.getName()));
         }
@@ -244,7 +248,7 @@ public class ObjectTest {
         for (File file : files) {
             file.delete();
         }
-        for (File file : files_more) {
+        for (File file : filesMore) {
             file.delete();
         }
     }

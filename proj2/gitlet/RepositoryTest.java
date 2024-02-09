@@ -463,7 +463,7 @@ public class RepositoryTest {
         removeFoler(Repository.GITLET_DIR);
 
         int nfile = 10;
-        File files[] = new File[nfile];
+        File[] files = new File[nfile];
         for (int i = 0; i < nfile; i++) {
             files[i] = new File("text" + i + ".txt");
             writeContents(files[i], "text");
