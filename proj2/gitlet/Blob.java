@@ -25,7 +25,7 @@ public class Blob implements Dumpable {
      */
     public Blob(File source) {
         this.source = source;
-        this.fileName = this.source.getPath();
+        this.fileName = this.source.getName();
         this.contents = readContents(source);
         this.id = sha1(fileName, contents);
         this.file = newBlobFile(id);

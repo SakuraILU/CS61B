@@ -214,7 +214,7 @@ public class MyUtils {
     /**
      * Find all file names in the given file.
      * 
-     * @return all [path:blobId] of files.
+     * @return all [path:blobId] of files
      */
     public static Map<String, String> workingFiles() {
         Map<String, String> workingFiles = new HashMap<String, String>();

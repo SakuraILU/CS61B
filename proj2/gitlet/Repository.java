@@ -241,13 +241,14 @@ public class Repository {
                     System.out.println(fileName + " (deleted)");
                 }
             } else if (!cId.equals(wId)) {
-                if (!addedFiles.containsKey(fileName)) {
+                String aId = addedFiles.get(fileName);
+                if (aId == null || !aId.equals(wId)) {
                     System.out.println(fileName + " (modified)");
                 }
             }
         }
         // changes not staged from stage --> working directory (addedFiles)
-        for (String fileName : addedFiles.keySet()) {
+        for (String fileName : differenceSet(addedFiles.keySet(), trackedFiles.keySet())) {
             String aId = addedFiles.get(fileName);
             String wId = workingFiles.get(fileName);
             if (wId == null) {
@@ -257,7 +258,7 @@ public class Repository {
             }
         }
         // changes not staged from working directory --> stage (removedFiles)
-        for (String fileName : removedFiles) {
+        for (String fileName : differenceSet(removedFileNames, trackedFiles.keySet())) {
             String wId = workingFiles.get(fileName);
             if (wId != null) {
                 System.out.println(fileName + " (deleted)");
