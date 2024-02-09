@@ -199,9 +199,9 @@ public class Repository {
     }
 
     public static void status() {
+        System.out.println("=== Branches ===");
         Branch curBranch = currentBranch();
         Set<Branch> branches = MyUtils.branches();
-        System.out.println("=== Branches ===");
         System.out.printf("*%s\n", curBranch.getBranchName());
         for (Branch branch : branches) {
             if (branch.equals(curBranch)) {
@@ -211,23 +211,58 @@ public class Repository {
         }
         System.out.println();
 
-        Stage stage = Stage.fromFile();
-
-        Set<String> addedFileNames = stage.getAddedFiles().keySet();
         System.out.println("=== Staged Files ===");
+        Stage stage = Stage.fromFile();
+        Set<String> addedFileNames = stage.getAddedFiles().keySet();
         for (String fileName : addedFileNames) {
             System.out.println(fileName);
         }
         System.out.println();
 
-        Set<String> removedFileNames = stage.getRemovedFileNames();
         System.out.println("=== Removed Files ===");
+        Set<String> removedFileNames = stage.getRemovedFileNames();
         for (String fileName : removedFileNames) {
             System.out.println(fileName);
         }
         System.out.println();
 
         System.out.println("=== Modifications Not Staged For Commit ===");
+        Map<String, String> trackedFiles = currentCommit().getTrackedFiles();
+        Map<String, String> workingFiles = MyUtils.workingFiles();
+        Map<String, String> addedFiles = stage.getAddedFiles();
+        Set<String> removedFiles = stage.getRemovedFileNames();
+        // changes not staged from current Commit --> working directory
+        for (String fileName : trackedFiles.keySet()) {
+            String cId = trackedFiles.get(fileName);
+            String wId = workingFiles.get(fileName);
+
+            if (wId == null) {
+                if (!removedFiles.contains(fileName)) {
+                    System.out.println(fileName + " (deleted)");
+                }
+            } else if (!cId.equals(wId)) {
+                if (!addedFiles.containsKey(fileName)) {
+                    System.out.println(fileName + " (modified)");
+                }
+            }
+        }
+        // changes not staged from stage --> working directory (addedFiles)
+        for (String fileName : addedFiles.keySet()) {
+            String aId = addedFiles.get(fileName);
+            String wId = workingFiles.get(fileName);
+            if (wId == null) {
+                System.out.println(fileName + " (deleted)");
+            } else if (!aId.equals(wId)) {
+                System.out.println(fileName + " (modified)");
+            }
+        }
+        // changes not staged from working directory --> stage (removedFiles)
+        for (String fileName : removedFiles) {
+            String wId = workingFiles.get(fileName);
+            if (wId != null) {
+                System.out.println(fileName + " (deleted)");
+            }
+        }
         System.out.println();
 
         System.out.println("=== Untracked Files ===");

@@ -18,11 +18,14 @@ public class MergeHandler {
     /** The split point commit */
     private static Commit splitCommit;
 
-    /** The tracked files in merged commit */
+    /** The [path:blobId] of tracked files in merged commit */
     private static Map<String, String> trackedFiles;
-    /** The files to be removed */
+    /** The fileNames to be removed */
     private static Set<String> removedFileNames;
-    /** The conflict files in merged commit, also are part of tracked files */
+    /**
+     * The [path:contents] of conflict files in merged commit, also are part of
+     * tracked files
+     */
     private static Map<String, String> conflictFiles;
 
     /**

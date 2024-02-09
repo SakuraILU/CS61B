@@ -214,6 +214,22 @@ public class MyUtils {
     /**
      * Find all file names in the given file.
      * 
+     * @return all [path:blobId] of files.
+     */
+    public static Map<String, String> workingFiles() {
+        Map<String, String> workingFiles = new HashMap<String, String>();
+        Set<String> fileNames = workingFileNames(Repository.CWD);
+        for (String fileName : fileNames) {
+            File file = join(Repository.CWD, fileName);
+            Blob blob = new Blob(file);
+            workingFiles.put(fileName, blob.getId());
+        }
+        return workingFiles;
+    }
+
+    /**
+     * Find all file names in the given file.
+     * 
      * @param file the file.
      * @return all file names in the given file.
      */

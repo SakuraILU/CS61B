@@ -27,12 +27,12 @@ public class ObjectTest {
         // fromFile
         Blob blob2 = Blob.fromFile(blob.getId());
         // getContentAsString
-        String blob_contents = blob2.getContentsAsString();
+        String blobContents = blob2.getContentsAsString();
 
         // assert ID
         assertEquals("Should be the same", blob.getId(), blob2.getId());
         // assert Contents
-        assertEquals("Should be the same", contents, blob_contents);
+        assertEquals("Should be the same", contents, blobContents);
 
         // delete file
         file.delete();
