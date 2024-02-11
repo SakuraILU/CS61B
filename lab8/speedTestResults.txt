@@ -1,0 +1,56 @@
+ This program inserts random Strings of length L
+ Into different types of maps as <String, Integer> pairs.
+
+What would you like L to be?: 20
+
+Enter # strings to insert into hashmap.ULLMap: 1000
+class hashmap.ULLMap: 0.01 sec
+
+Enter # strings to insert into your hashmap.MyHashMap: 1000
+class hashmap.MyHashMap: 0.01 sec
+
+Enter # strings to insert into Java's HashMap: 1000
+Java's Built-in HashMap: 0.00 sec
+
+Would you like to try more timed-tests? (y/n)y
+
+Enter # strings to insert into hashmap.ULLMap: 10000
+class hashmap.ULLMap: 0.32 sec
+
+Enter # strings to insert into your hashmap.MyHashMap: 10000
+class hashmap.MyHashMap: 0.02 sec
+
+Enter # strings to insert into Java's HashMap: 10000 
+Java's Built-in HashMap: 0.01 sec
+
+Would you like to try more timed-tests? (y/n)y
+
+Enter # strings to insert into hashmap.ULLMap: 100000
+--Stack Overflow -- couldn't add 100000 strings of length 20.
+
+Enter # strings to insert into your hashmap.MyHashMap: 100000
+class hashmap.MyHashMap: 0.08 sec
+
+Enter # strings to insert into Java's HashMap: 100000
+Java's Built-in HashMap: 0.04 sec
+
+Would you like to try more timed-tests? (y/n)y
+
+Enter # strings to insert into hashmap.ULLMap: 1000000
+--Stack Overflow -- couldn't add 1000000 strings of length 20.
+
+Enter # strings to insert into your hashmap.MyHashMap: 1000000
+class hashmap.MyHashMap: 0.94 sec
+
+Enter # strings to insert into Java's HashMap: 1000000
+Java's Built-in HashMap: 0.36 sec
+
+
+
+Q: When would it be better to use a BSTMap/TreeMap instead of a HashMap?
+
+A: If we need to perform operations that depend on the order of the entire <Key, Value> pairs, 
+such as sorting, finding maximum or minimum values, and ranking, it would be more efficient to 
+use a BSTMap/TreeMap instead of a HashMap. When carrying out these operations, HashMap requires 
+merging elements from different buckets first, which takes O(N) time, whereas BSTMap/TreeMap 
+simply involves traversing the entire tree.
