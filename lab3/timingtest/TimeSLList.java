@@ -23,7 +23,7 @@ public class TimeSLList {
     }
 
     public static void timeGetLast() {
-        int opCount = 1000;
+        int opCount = 10000;
 
         AList<Integer> Ns = new AList<>();
         AList<Double> times = new AList<>();
