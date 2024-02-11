@@ -18,8 +18,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         }
     }
 
-    Node root;
-    int size;
+    private Node root;
+    private int size;
 
     @Override
     /** Removes all of the mappings from this map. */
@@ -186,5 +186,19 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     public Iterator<K> iterator() {
         return keySet().iterator();
+    }
+
+    public void printInOrder() {
+        printInOrder(root);
+    }
+
+    private void printInOrder(Node node) {
+        if (node == null) {
+            return;
+        }
+
+        printInOrder(node.left);
+        System.out.printf("{%s, %s} ", node.key, node.value);
+        printInOrder(node.right);
     }
 }
