@@ -14,33 +14,35 @@ public class TestArrayDequeEC {
         StudentArrayDeque<Integer> sad = new StudentArrayDeque<>();
         ArrayDequeSolution<Integer> ad = new ArrayDequeSolution<>();
 
-        int cmdNum = 5;
+        int cmdNum = 7;
         int testNum = 1000;
+        int valueRange = 2000;
         for (int i = 0; i < testNum; i++) {
             int kind = StdRandom.uniform(cmdNum);
             switch (kind) {
                 case 0: {
-                    int x = StdRandom.uniform(1000);
-                    sad.addFirst(x);
-                    ad.addFirst(x);
-                    callSeq.append(String.format("addFirst(%s)\n", x));
+                    int v = StdRandom.uniform(valueRange);
+                    ad.addFirst(v);
+                    sad.addFirst(v);
+                    callSeq.append(String.format("addFirst(%s)\n", v));
                     break;
                 }
                 case 1: {
-                    int x = StdRandom.uniform(1000);
-                    sad.addLast(x);
-                    ad.addLast(x);
-                    callSeq.append(String.format("addLast(%s)\n", x));
+                    int v = StdRandom.uniform(valueRange);
+                    ad.addLast(v);
+                    sad.addLast(v);
+                    callSeq.append(String.format("addLast(%s)\n", v));
                     break;
                 }
                 case 2: {
                     if (ad.isEmpty()) {
                         break;
                     }
-                    Integer actual = sad.removeFirst();
                     Integer expected = ad.removeFirst();
+                    Integer actual = sad.removeFirst();
                     callSeq.append("removeFirst()\n");
                     assertEquals(callSeq.toString(), expected, actual);
+                    break;
                 }
                 case 3: {
                     if (ad.isEmpty()) {
@@ -49,13 +51,40 @@ public class TestArrayDequeEC {
                     Integer expected = ad.removeLast();
                     Integer actual = sad.removeLast();
                     callSeq.append("removeLast()\n");
-                    assertEquals(callSeq.toString(), expected, actual);
+
+                    String result = callSeq.toString();
+                    assertEquals(result.substring(0, result.length() - 1), expected, actual);
+                    break;
                 }
                 case 4: {
                     int expected = ad.size();
                     int actual = sad.size();
                     callSeq.append("size()\n");
-                    assertEquals(callSeq.toString(), expected, actual);
+
+                    String result = callSeq.toString();
+                    assertEquals(result.substring(0, result.length() - 1), expected, actual);
+                    break;
+                }
+                case 5: {
+                    if (ad.isEmpty()) {
+                        break;
+                    }
+                    int index = StdRandom.uniform(ad.size());
+                    Integer actual = sad.get(index);
+                    Integer expected = ad.get(index);
+
+                    String result = callSeq.toString();
+                    assertEquals(result.substring(0, result.length() - 1), expected, actual);
+                    break;
+                }
+                case 6: {
+                    boolean expected = ad.isEmpty();
+                    boolean actual = sad.isEmpty();
+                    callSeq.append("isEmpty()\n");
+
+                    String result = callSeq.toString();
+                    assertEquals(result.substring(0, result.length() - 1), expected, actual);
+                    break;
                 }
                 default: {
                     break;
