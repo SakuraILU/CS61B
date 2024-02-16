@@ -65,7 +65,9 @@ public class MazeAStarPath extends MazeExplorer {
                     edgeTo[neighbor] = v;
                     distTo[neighbor] = distTo[v] + 1;
                     announce();
-                    nodeToVisit.add(neighbor);
+                    if (!nodeToVisit.contains(v)) {
+                        nodeToVisit.add(neighbor);
+                    }
                 }
             }
         }
