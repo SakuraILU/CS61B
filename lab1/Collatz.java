@@ -1,8 +1,10 @@
+
 /**
  * Class that prints the Collatz sequence starting from a given number.
  * 
  * @author YOUR NAME HERE
  */
+
 public class Collatz {
 
     /** Buggy implementation of nextNumber! */
@@ -10,7 +12,6 @@ public class Collatz {
         if (n == 1) {
             return 1;
         }
-
         if (n % 2 == 0) {
             return n / 2;
         } else {
@@ -25,6 +26,7 @@ public class Collatz {
             n = nextNumber(n);
             System.out.print(n + " ");
         }
+
         System.out.println();
     }
 }
