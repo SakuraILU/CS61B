@@ -61,6 +61,10 @@ public class MazeAStarPath extends MazeExplorer {
             }
 
             for (int neighbor : maze.adj(v)) {
+                if (marked[v]) {
+                    continue;
+                }
+
                 if (distTo[v] + 1 < distTo[neighbor]) {
                     edgeTo[neighbor] = v;
                     distTo[neighbor] = distTo[v] + 1;
