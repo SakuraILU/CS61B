@@ -9,7 +9,8 @@ public class Percolation {
 
     private State[][] sites;
     private int size;
-    private int source; // if a site connect to the source, it's full
+    private int top;
+    private int bottom;
     private WeightedQuickUnionUF graph;
 
     // create N-by-N grid, with all sites initially blocked
@@ -24,8 +25,9 @@ public class Percolation {
         }
         size = N;
 
-        source = 0;
-        graph = new WeightedQuickUnionUF(N * N + 1);
+        top = 0;
+        bottom = N * N + 1;
+        graph = new WeightedQuickUnionUF(N * N + 2);
     }
 
     // open the site (row, col) if it is not open already
@@ -50,9 +52,12 @@ public class Percolation {
             graph.union(curNode, toNodeId(row, col + 1));
         }
 
-        // if open a site in the first row, connect to the source node.
+        // if open a site in the first row, connect to the top node.
         if (row == 0) {
-            graph.union(curNode, source);
+            graph.union(curNode, top);
+        }
+        if (row == size - 1) {
+            graph.union(curNode, bottom);
         }
     }
 
@@ -63,7 +68,7 @@ public class Percolation {
 
     // is the site (row, col) full?
     public boolean isFull(int row, int col) {
-        return graph.connected(toNodeId(row, col), source);
+        return graph.connected(toNodeId(row, col), top);
     }
 
     // number of open sites
@@ -81,12 +86,7 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        for (int col = 0; col < size; col++) {
-            if (isOpen(size - 1, col) && isFull(size - 1, col)) {
-                return true;
-            }
-        }
-        return false;
+        return graph.connected(top, bottom);
     }
 
     // map the site to int ID
