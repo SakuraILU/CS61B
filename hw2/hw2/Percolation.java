@@ -13,7 +13,11 @@ public class Percolation {
     private WeightedQuickUnionUF graph;
 
     // create N-by-N grid, with all sites initially blocked
-    public Percolation(int N) {
+    public Percolation(int N) throws IllegalArgumentException {
+        if (N <= 0) {
+            throw new IllegalArgumentException();
+        }
+
         sites = new State[N][];
         for (int i = 0; i < N; i++) {
             sites[i] = new State[N];
@@ -88,5 +92,8 @@ public class Percolation {
     // map the site to int ID
     private int toNodeId(int col, int row) {
         return row * size + col + 1;
+    }
+
+    public static void main(String[] args) {
     }
 }
