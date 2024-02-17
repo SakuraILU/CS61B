@@ -12,6 +12,7 @@ public class Percolation {
     private int top;
     private int bottom;
     private WeightedQuickUnionUF graph;
+    private WeightedQuickUnionUF graphWithBottom;
 
     // create N-by-N grid, with all sites initially blocked
     public Percolation(int N) throws IllegalArgumentException {
@@ -27,7 +28,8 @@ public class Percolation {
 
         top = 0;
         bottom = N * N + 1;
-        graph = new WeightedQuickUnionUF(N * N + 2);
+        graph = new WeightedQuickUnionUF(N * N + 1);
+        graphWithBottom = new WeightedQuickUnionUF(N * N + 2);
     }
 
     // open the site (row, col) if it is not open already
@@ -41,23 +43,28 @@ public class Percolation {
         int curNode = toNodeId(row, col);
         if (row > 0 && sites[row - 1][col] == State.OPEND) {
             graph.union(curNode, toNodeId(row - 1, col));
+            graphWithBottom.union(curNode, toNodeId(row - 1, col));
         }
         if (row < size - 1 && sites[row + 1][col] == State.OPEND) {
             graph.union(curNode, toNodeId(row + 1, col));
+            graphWithBottom.union(curNode, toNodeId(row + 1, col));
         }
         if (col > 0 && sites[row][col - 1] == State.OPEND) {
             graph.union(curNode, toNodeId(row, col - 1));
+            graphWithBottom.union(curNode, toNodeId(row, col - 1));
         }
         if (col < size - 1 && sites[row][col + 1] == State.OPEND) {
             graph.union(curNode, toNodeId(row, col + 1));
+            graphWithBottom.union(curNode, toNodeId(row, col + 1));
         }
 
         // if open a site in the first row, connect to the top node.
         if (row == 0) {
             graph.union(curNode, top);
+            graphWithBottom.union(curNode, top);
         }
         if (row == size - 1) {
-            graph.union(curNode, bottom);
+            graphWithBottom.union(curNode, bottom);
         }
     }
 
@@ -86,7 +93,7 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        return graph.connected(top, bottom);
+        return graphWithBottom.connected(top, bottom);
     }
 
     // map the site to int ID

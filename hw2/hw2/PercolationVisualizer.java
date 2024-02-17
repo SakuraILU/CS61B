@@ -78,11 +78,12 @@ public class PercolationVisualizer {
             draw(perc, N);
             StdDraw.show(DELAY);
         }
+        System.out.println(perc.isFull(2, 0));
     }
 
     public static void main(String[] args) {
-        String filename = args[0];
-        // String filename = "inputFiles/input20.txt";
+        // String filename = args[0];
+        String filename = "inputFiles/input3.txt";
         simulateFromFile(filename);
     }
 }
