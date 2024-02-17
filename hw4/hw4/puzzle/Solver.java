@@ -1,6 +1,12 @@
 package hw4.puzzle;
 
-import java.util.*;
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Solver {
     private WorldState start;
@@ -8,6 +14,7 @@ public class Solver {
     private Set<WorldState> marked;
     private Map<WorldState, Integer> distTo;
     private Map<WorldState, WorldState> edgeTo;
+    private LinkedList<WorldState> solution;
 
     public Solver(WorldState initial) {
         start = initial;
@@ -32,7 +39,7 @@ public class Solver {
             marked.add(node);
             if (node.isGoal()) {
                 goal = node;
-                return;
+                break;
             }
 
             for (WorldState neighbor : node.neighbors()) {
@@ -51,24 +58,19 @@ public class Solver {
                 }
             }
         }
+
+        solution = new LinkedList<>();
+        for (WorldState node = goal; !node.equals(start); node = edgeTo.get(node)) {
+            solution.addFirst(node);
+        }
+        solution.addFirst(start);
     }
 
     public int moves() {
-        return startToGoalPath().size() - 1;
+        return solution.size() - 1;
     }
 
     public Iterable<WorldState> solution() {
-        return startToGoalPath();
-    }
-
-    private List<WorldState> startToGoalPath() {
-        LinkedList<WorldState> paths = new LinkedList<>();
-
-        for (WorldState node = goal; !node.equals(start); node = edgeTo.get(node)) {
-            paths.addFirst(node);
-        }
-        paths.addFirst(start);
-
-        return paths;
+        return solution;
     }
 }

@@ -14,7 +14,11 @@ public class Board implements WorldState {
         }
     }
 
-    public int tileAt(int i, int j) {
+    public int tileAt(int i, int j) throws IndexOutOfBoundsException {
+        if (i < 0 || i >= tiles.length || j < 0 || j >= tiles[0].length) {
+            throw new IndexOutOfBoundsException();
+        }
+
         return tiles[i][j];
     }
 
@@ -64,7 +68,7 @@ public class Board implements WorldState {
     public int hamming() {
         int dist = 0;
 
-        for (int i = 1; i < 9; i++) {
+        for (int i = 1; i < tiles.length * tiles.length; i++) {
             int row = toRow(i);
             int col = toCol(i);
             if (tiles[row][col] != i) {
@@ -105,6 +109,7 @@ public class Board implements WorldState {
         return manhattan();
     }
 
+    @Override
     public boolean equals(Object y) {
         if (y == this) {
             return true;
@@ -118,6 +123,11 @@ public class Board implements WorldState {
         }
 
         Board other = (Board) y;
+
+        if (other.size() != size()) {
+            return false;
+        }
+
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[0].length; j++) {
                 if (tiles[i][j] != other.tiles[i][j]) {
@@ -129,6 +139,7 @@ public class Board implements WorldState {
         return true;
     }
 
+    @Override
     /**
      * Returns the string representation of the board.
      */
@@ -144,6 +155,17 @@ public class Board implements WorldState {
         }
         s.append("\n");
         return s.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles[0].length; j++) {
+                hash = 31 * hash + tiles[i][j];
+            }
+        }
+        return hash;
     }
 
 }
