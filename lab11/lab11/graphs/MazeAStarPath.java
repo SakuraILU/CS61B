@@ -45,6 +45,7 @@ public class MazeAStarPath extends MazeExplorer {
         // TODO
         Comparator<Integer> cmp = new Comparator<Integer>() {
             public int compare(Integer node1, Integer node2) {
+                // A start, priority is distToSource + estimateDistToTarget
                 return distTo[node1] + h(node1) - distTo[node2] - h(node2);
             }
         };
@@ -53,6 +54,7 @@ public class MazeAStarPath extends MazeExplorer {
         nodeToVisit.add(s);
 
         while (!nodeToVisit.isEmpty()) {
+            // visit the smallest node
             int v = nodeToVisit.remove();
             marked[v] = true;
             announce();
@@ -60,8 +62,9 @@ public class MazeAStarPath extends MazeExplorer {
                 return;
             }
 
+            // relax all unMarked neigbhors
             for (int neighbor : maze.adj(v)) {
-                if (marked[v]) {
+                if (marked[neighbor]) {
                     continue;
                 }
 
@@ -69,9 +72,12 @@ public class MazeAStarPath extends MazeExplorer {
                     edgeTo[neighbor] = v;
                     distTo[neighbor] = distTo[v] + 1;
                     announce();
-                    if (!nodeToVisit.contains(v)) {
-                        nodeToVisit.add(neighbor);
+
+                    // change priority of this node
+                    if (nodeToVisit.contains(neighbor)) {
+                        nodeToVisit.remove(neighbor);
                     }
+                    nodeToVisit.add(neighbor);
                 }
             }
         }
