@@ -82,7 +82,7 @@ public class Percolation {
     // does the system percolate?
     public boolean percolates() {
         for (int col = 0; col < size; col++) {
-            if (isFull(size - 1, col)) {
+            if (isOpen(size - 1, col) && isFull(size - 1, col)) {
                 return true;
             }
         }

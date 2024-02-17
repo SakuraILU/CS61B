@@ -22,7 +22,7 @@ public class PercolationStats {
                 int col = StdRandom.uniform(N);
                 perc.open(row, col);
             }
-            results[round] = ((double) perc.numberOfOpenSites()) / N * N;
+            results[round] = ((double) perc.numberOfOpenSites()) / ((double) N * N);
         }
     }
 
@@ -44,5 +44,11 @@ public class PercolationStats {
     // high endpoint of 95% confidence interval
     public double confidenceHigh() {
         return mean() + 1.96 * stddev() / Math.sqrt(T);
+    }
+
+    public static void main(String[] args) {
+        PercolationStats ps = new PercolationStats(20, 10, new PercolationFactory());
+        System.out.println(ps.mean());
+        System.out.println(ps.stddev());
     }
 }
