@@ -1,9 +1,11 @@
 import java.util.Objects;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,7 +48,8 @@ public class Router {
 
         PriorityQueue<Long> toVisit = new PriorityQueue<Long>(new Comparator<Long>() {
             public int compare(Long node1, Long node2) {
-                return (int) ((distTo.get(node1) + g.distance(node1, t)) - (distTo.get(node2) + g.distance(node2, t)));
+                return (int) ((distTo.get(node1) + 10 * g.distance(node1, t))
+                        - (distTo.get(node2) + 10 * g.distance(node2, t)));
             }
         });
 
@@ -55,6 +58,7 @@ public class Router {
             long node = toVisit.remove();
 
             for (long neighbor : g.adjacent(node)) {
+
                 double weight = g.distance(node, neighbor);
                 if (!distTo.containsKey(neighbor) || distTo.get(node) + weight < distTo.get(neighbor)) {
                     distTo.put(neighbor, distTo.get(node) + weight);
