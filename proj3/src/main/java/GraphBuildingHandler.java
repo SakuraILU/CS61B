@@ -96,9 +96,9 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* TODO Use the above information to save a "node" to somewhere. */
             /* Hint: A graph-like structure would be nice. */
             id = Long.parseLong(attributes.getValue("id"));
-            double lat = Double.parseDouble(attributes.getValue("lat"));
             double lon = Double.parseDouble(attributes.getValue("lon"));
-            g.addNode(id, lat, lon);
+            double lat = Double.parseDouble(attributes.getValue("lat"));
+            g.addNode(id, lon, lat);
 
         } else if (qName.equals("way")) {
             /* We encountered a new <way...> tag. */

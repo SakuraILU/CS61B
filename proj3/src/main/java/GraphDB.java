@@ -30,13 +30,13 @@ public class GraphDB {
      */
     private class Node {
         public String name;
-        public double lat;
         public double lon;
+        public double lat;
 
-        Node(String nodeName, double latitude, double longitude) {
+        Node(String nodeName, double longitude, double latitude) {
             this.name = nodeName;
-            this.lat = latitude;
             this.lon = longitude;
+            this.lat = latitude;
         }
     }
 
@@ -92,14 +92,14 @@ public class GraphDB {
         clean();
     }
 
-    public void addNode(long v, double lat, double lon) {
+    public void addNode(long v, double lon, double lat) {
         if (graph.containsKey(v)) {
             return;
         }
 
         graph.put(v, new HashSet<Edge>());
 
-        Node node = createNode("", lat, lon);
+        Node node = createNode("", lon, lat);
         idToNode.put(v, node);
     }
 
@@ -278,8 +278,8 @@ public class GraphDB {
         return node.lat;
     }
 
-    private Node createNode(String name, double lat, double lon) {
-        return new Node(name, lat, lon);
+    private Node createNode(String name, double lon, double lat) {
+        return new Node(name, lon, lat);
     }
 
     private Edge createEdge(String name, long from, long to) {
