@@ -48,17 +48,27 @@ public class Router {
 
         PriorityQueue<Long> toVisit = new PriorityQueue<Long>(new Comparator<Long>() {
             public int compare(Long node1, Long node2) {
-                return (int) ((distTo.get(node1) + 10 * g.distance(node1, t))
-                        - (distTo.get(node2) + 10 * g.distance(node2, t)));
+                double h1 = distTo.get(node1) + g.distance(node1, t);
+                double h2 = distTo.get(node2) + g.distance(node2, t);
+
+                if (h1 < h2) {
+                    return -1;
+                } else if (h1 == h2) {
+                    return 0;
+                } else {
+                    return 1;
+                }
             }
         });
 
         toVisit.add(s);
         while (!toVisit.isEmpty()) {
             long node = toVisit.remove();
+            if (node == t) {
+                break;
+            }
 
             for (long neighbor : g.adjacent(node)) {
-
                 double weight = g.distance(node, neighbor);
                 if (!distTo.containsKey(neighbor) || distTo.get(node) + weight < distTo.get(neighbor)) {
                     distTo.put(neighbor, distTo.get(node) + weight);
