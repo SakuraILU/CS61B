@@ -16,7 +16,6 @@ import java.io.IOException;
 
 /* Maven is used to pull in these dependencies. */
 import com.google.gson.Gson;
-
 import static spark.Spark.*;
 
 /**
@@ -110,6 +109,7 @@ public class MapServer {
     public static void main(String[] args) {
         initialize();
         staticFileLocation("/page");
+        // staticFileLocation("/src/static/page");
         /*
          * Allow for all origin requests (since this is not an authenticated server, we
          * do not
@@ -120,7 +120,6 @@ public class MapServer {
             response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
         });
-
         /*
          * Define the raster endpoint for HTTP GET requests. I use anonymous functions
          * to define
@@ -140,12 +139,10 @@ public class MapServer {
                 String encodedImage = Base64.getEncoder().encodeToString(os.toByteArray());
                 rasteredImgParams.put("b64_encoded_image_data", encodedImage);
             }
-
             /* Encode response to Json */
             Gson gson = new Gson();
             return gson.toJson(rasteredImgParams);
         });
-
         /* Define the routing endpoint for HTTP GET requests. */
         get("/route", (req, res) -> {
             HashMap<String, Double> params = getRequestParams(req, REQUIRED_ROUTE_REQUEST_PARAMS);
@@ -159,13 +156,11 @@ public class MapServer {
             Gson gson = new Gson();
             return gson.toJson(routeParams);
         });
-
         /* Define the API endpoint for clearing the current route. */
         get("/clear_route", (req, res) -> {
             clearRoute();
             return true;
         });
-
         /* Define the API endpoint for search */
         get("/search", (req, res) -> {
             Set<String> reqParams = req.queryParams();
@@ -181,7 +176,6 @@ public class MapServer {
                 return gson.toJson(matches);
             }
         });
-
         /* Define map application redirect */
         get("/", (request, response) -> {
             response.redirect("/map.html", 301);
@@ -308,7 +302,7 @@ public class MapServer {
      *         cleaned <code>prefix</code>.
      */
     public static List<String> getLocationsByPrefix(String prefix) {
-        return new LinkedList<>();
+        return graph.getLocationNamesByPrefix(prefix);
     }
 
     /**
@@ -327,7 +321,20 @@ public class MapServer {
      *         "id" : Number, The id of the node. <br>
      */
     public static List<Map<String, Object>> getLocations(String locationName) {
-        return new LinkedList<>();
+        List<Map<String, Object>> locations = new LinkedList<>();
+
+        Iterable<GraphDB.Node> nodes = graph.getLocations(locationName);
+        for (GraphDB.Node node : nodes) {
+            Map<String, Object> location = new HashMap<String, Object>();
+            location.put("lat", node.lat());
+            location.put("lon", node.lon());
+            location.put("name", node.name());
+            location.put("id", node.id());
+
+            locations.add(location);
+        }
+
+        return locations;
     }
 
     /**

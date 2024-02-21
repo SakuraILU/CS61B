@@ -1,11 +1,9 @@
 import java.util.Objects;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,15 +66,15 @@ public class Router {
                 break;
             }
 
-            for (long neighbor : g.adjacent(node)) {
-                double weight = g.distance(node, neighbor);
-                if (!distTo.containsKey(neighbor) || distTo.get(node) + weight < distTo.get(neighbor)) {
+            for (GraphDB.Edge e : g.adjEdges(node)) {
+                long neighbor = e.to();
+                double weight = e.weight();
+                if (!distTo.containsKey(neighbor) ||
+                        distTo.get(node) + weight < distTo.get(neighbor)) {
                     distTo.put(neighbor, distTo.get(node) + weight);
                     preNode.put(neighbor, node);
 
-                    if (toVisit.contains(neighbor)) {
-                        toVisit.remove(neighbor);
-                    }
+                    toVisit.remove(neighbor);
                     toVisit.add(neighbor);
                 }
             }
@@ -87,7 +85,7 @@ public class Router {
             path.addFirst(node);
         }
 
-        return path; // FIXME
+        return path;
     }
 
     /**
@@ -100,7 +98,66 @@ public class Router {
      *         route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+        List<NavigationDirection> navs = new LinkedList<>();
+
+        int direction = NavigationDirection.START;
+        double distance = 0;
+        for (int i = 1; i < route.size(); i++) {
+            long preV = route.get(i - 1);
+            long curV = route.get(i);
+            GraphDB.Edge preE = g.edge(preV, curV);
+            distance += preE.weight();
+
+            if (i == route.size() - 1) {
+                NavigationDirection nav = new NavigationDirection();
+                nav.way = preE.name();
+                nav.direction = direction;
+                nav.distance = distance;
+                navs.add(nav);
+                break;
+            }
+
+            long nextV = route.get(i + 1);
+            GraphDB.Edge curE = g.edge(curV, nextV);
+            if (!preE.name().equals(curE.name())) {
+                NavigationDirection nav = new NavigationDirection();
+                nav.way = preE.name();
+                nav.direction = direction;
+                nav.distance = distance;
+                navs.add(nav);
+
+                double preBearing = g.bearing(curV, preV);
+                double curBearing = g.bearing(nextV, curV);
+                double diffBearing = normalizeDiffBearing(curBearing - preBearing);
+                double absDiffBearing = Math.abs(diffBearing);
+                if (absDiffBearing <= 15) {
+                    direction = NavigationDirection.STRAIGHT;
+                } else if (absDiffBearing <= 30) {
+                    direction = diffBearing < 0 ? NavigationDirection.SLIGHT_LEFT
+                            : NavigationDirection.SLIGHT_RIGHT;
+                } else if (absDiffBearing <= 100) {
+                    direction = diffBearing < 0 ? NavigationDirection.LEFT
+                            : NavigationDirection.RIGHT;
+                } else {
+                    direction = diffBearing < 0 ? NavigationDirection.SHARP_LEFT
+                            : NavigationDirection.SHARP_RIGHT;
+                }
+
+                distance = 0;
+            }
+        }
+
+        return navs;
+    }
+
+    private static double normalizeDiffBearing(double diffBearing) {
+        if (diffBearing > 180) {
+            diffBearing = diffBearing - 360;
+        } else if (diffBearing < -180) {
+            diffBearing = diffBearing + 360;
+        }
+
+        return diffBearing;
     }
 
     /**

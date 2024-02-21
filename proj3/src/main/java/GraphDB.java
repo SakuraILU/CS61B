@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;;
+import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;;
 
 /**
  * Graph for storing all of the intersection (vertex) and road (edge)
@@ -28,29 +30,51 @@ public class GraphDB {
      * Your instance variables for storing the graph. You should consider
      * creating helper classes, e.g. Node, Edge, etc.
      */
-    private class Node {
-        public String name;
-        public double lon;
-        public double lat;
+    public class Node {
+        private final String name;
+        private final long id;
+        private final double lon;
+        private final double lat;
 
-        Node(String nodeName, double longitude, double latitude) {
+        Node(long id, String nodeName, double longitude, double latitude) {
+            this.id = id;
             this.name = nodeName;
             this.lon = longitude;
             this.lat = latitude;
         }
+
+        public String name() {
+            return name;
+        }
+
+        public long id() {
+            return id;
+        }
+
+        public double lon() {
+            return lon;
+        }
+
+        public double lat() {
+            return lat;
+        }
     }
 
-    private class Edge {
-        public String name;
-        public long from;
-        public long to;
-        public double weight;
+    public class Edge {
+        private String name;
+        private long from;
+        private long to;
+        private double weight;
 
         Edge(String edgeName, long from, long to) {
             this.name = edgeName;
             this.from = from;
             this.to = to;
             this.weight = distance(from, to);
+        }
+
+        public String name() {
+            return name;
         }
 
         public long from() {
@@ -68,7 +92,8 @@ public class GraphDB {
 
     private Map<Long, Set<Edge>> graph = new HashMap<Long, Set<Edge>>();
     private Map<Long, Node> idToNode = new HashMap<Long, Node>();
-    private Map<String, Set<Node>> locations = new HashMap<String, Set<Node>>();
+    private TrieMap<Set<Node>> locations = new TrieMap<Set<Node>>();
+    private KDTree nodeKDTree = new KDTree();
 
     /**
      * Example constructor shows how to create and start an XML parser.
@@ -90,33 +115,34 @@ public class GraphDB {
             e.printStackTrace();
         }
         clean();
+
+        buildKDTree();
     }
 
-    public void addNode(long v, double lon, double lat) {
-        if (graph.containsKey(v)) {
+    public void addNode(long id, String name, double lon, double lat) {
+        if (graph.containsKey(id)) {
             return;
         }
 
-        graph.put(v, new HashSet<Edge>());
+        graph.put(id, new HashSet<Edge>());
 
-        Node node = createNode("", lon, lat);
-        idToNode.put(v, node);
+        Node node = createNode(id, name, lon, lat);
+        idToNode.put(id, node);
     }
 
-    public void addLocation(String name, long v) {
-        Node node = idToNode.get(v);
-        node.name = name;
-
+    public void addLocation(String name, long id) {
         String cleanName = cleanString(name);
         if (!locations.containsKey(cleanName)) {
             locations.put(cleanName, new HashSet<>());
         }
+        Node node = idToNode.get(id);
         locations.get(cleanName).add(node);
     }
 
     public void addEdge(String name, long v, long w) {
         if (!graph.containsKey(v) || !graph.containsKey(w)) {
-            throw new IllegalArgumentException("nodes are not added into graph yet, but try to add their edge");
+            throw new IllegalArgumentException(
+                    "nodes are not added into graph yet, but try to add their edge");
         }
 
         graph.get(v).add(createEdge(name, v, w));
@@ -127,6 +153,29 @@ public class GraphDB {
         for (int i = 0; i < vs.length - 1; i++) {
             addEdge(name, vs[i], vs[i + 1]);
         }
+    }
+
+    public Set<Node> getLocations(String locationName) {
+        locationName = cleanString(locationName);
+        return locations.get(locationName);
+    }
+
+    public List<String> getLocationNamesByPrefix(String prefix) {
+        List<String> locationNames = new LinkedList<>();
+
+        prefix = cleanString(prefix);
+        Set<String> keys = locations.keySetWithPrefix(prefix);
+        if (keys == null) {
+            return locationNames;
+        }
+
+        for (String key : keys) {
+            for (Node node : locations.get(key)) {
+                locationNames.add(node.name());
+            }
+        }
+
+        return locationNames;
     }
 
     /**
@@ -147,13 +196,19 @@ public class GraphDB {
      * we can reasonably assume this since typically roads are connected.
      */
     private void clean() {
-        // TODO: Your code here.
         Iterator<Map.Entry<Long, Set<Edge>>> itr = graph.entrySet().iterator();
         while (itr.hasNext()) {
             Map.Entry<Long, Set<Edge>> entry = itr.next();
             if (entry.getValue().size() <= 0) {
                 itr.remove();
             }
+        }
+    }
+
+    private void buildKDTree() {
+        for (long id : graph.keySet()) {
+            Node node = idToNode.get(id);
+            nodeKDTree.insert(node.id, node.lon, node.lat);
         }
     }
 
@@ -174,12 +229,27 @@ public class GraphDB {
      * @return An iterable of the ids of the neighbors of v.
      */
     Iterable<Long> adjacent(long v) {
-        Set<Long> adj = new HashSet<>();
+        Set<Long> adjVertex = new HashSet<>();
         for (Edge e : graph.get(v)) {
-            adj.add(e.to());
+            adjVertex.add(e.to());
         }
 
-        return adj;
+        return adjVertex;
+    }
+
+    public Iterable<Edge> adjEdges(long v) {
+        return graph.get(v);
+    }
+
+    public Edge edge(long v, long w) {
+        Iterable<Edge> edges = graph.get(v);
+        for (Edge edge : edges) {
+            if (edge.to() == w) {
+                return edge;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -243,17 +313,7 @@ public class GraphDB {
      * @return The id of the node in the graph closest to the target.
      */
     long closest(double lon, double lat) {
-        double minDistance = Double.MAX_VALUE;
-        long closestVertix = -1;
-        for (Long v : vertices()) {
-            double distance = distance(lon, lat, lon(v), lat(v));
-            if (distance < minDistance) {
-                closestVertix = v;
-                minDistance = distance;
-            }
-        }
-
-        return closestVertix;
+        return nodeKDTree.nearest(lon, lat);
     }
 
     /**
@@ -278,8 +338,8 @@ public class GraphDB {
         return node.lat;
     }
 
-    private Node createNode(String name, double lon, double lat) {
-        return new Node(name, lon, lat);
+    private Node createNode(long id, String name, double lon, double lat) {
+        return new Node(id, name, lon, lat);
     }
 
     private Edge createEdge(String name, long from, long to) {

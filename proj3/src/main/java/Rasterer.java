@@ -59,8 +59,6 @@ public class Rasterer {
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
         // System.out.println(params);
         Map<String, Object> results = new HashMap<>();
-        System.out.println("Since you haven't implemented getMapRaster, nothing is displayed in "
-                + "your browser.");
 
         double ullon = params.get("ullon");
         double lrlon = params.get("lrlon");
@@ -90,7 +88,9 @@ public class Rasterer {
         for (int row = 0; row < renderGrid.length; row++) {
             renderGrid[row] = new String[rTileN - lTileN + 1];
             for (int col = 0; col < renderGrid[0].length; col++) {
-                renderGrid[row][col] = String.format("d%d_x%d_y%d.png", depth, col + lTileN, row + tTileN);
+                int x = col + lTileN;
+                int y = row + tTileN;
+                renderGrid[row][col] = String.format("d%d_x%d_y%d.png", depth, x, y);
             }
         }
 
@@ -111,7 +111,8 @@ public class Rasterer {
 
     private int getDepth(double ullon, double lrlon, double w) {
         double desireLonDPP = (lrlon - ullon) / w;
-        int depth = (int) Math.ceil(Math.log((ROOT_LRLON - ROOT_ULLON) / (TILE_SIZE * desireLonDPP)) / Math.log(2));
+        int depth = (int) Math.ceil(
+                Math.log((ROOT_LRLON - ROOT_ULLON) / (TILE_SIZE * desireLonDPP)) / Math.log(2));
         return depth > MAX_DEPTH ? MAX_DEPTH : depth;
     }
 }

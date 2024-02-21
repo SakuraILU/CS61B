@@ -48,6 +48,8 @@ public class GraphBuildingHandler extends DefaultHandler {
     private final GraphDB g;
 
     private long id = -1;
+    private double lon = -1;
+    private double lat = -1;
     private String name = "";
     private boolean isWayValid = false;
     private LinkedList<Long> ways = new LinkedList<>();
@@ -93,13 +95,11 @@ public class GraphBuildingHandler extends DefaultHandler {
             // System.out.println("Node lon: " + attributes.getValue("lon"));
             // System.out.println("Node lat: " + attributes.getValue("lat"));
 
-            /* TODO Use the above information to save a "node" to somewhere. */
+            /* Use the above information to save a "node" to somewhere. */
             /* Hint: A graph-like structure would be nice. */
             id = Long.parseLong(attributes.getValue("id"));
-            double lon = Double.parseDouble(attributes.getValue("lon"));
-            double lat = Double.parseDouble(attributes.getValue("lat"));
-            g.addNode(id, lon, lat);
-
+            lon = Double.parseDouble(attributes.getValue("lon"));
+            lat = Double.parseDouble(attributes.getValue("lat"));
         } else if (qName.equals("way")) {
             /* We encountered a new <way...> tag. */
             activeState = "way";
@@ -109,7 +109,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             // System.out.println("Id of a node in this way: " +
             // attributes.getValue("ref"));
             /*
-             * TODO Use the above id to make "possible" connections between the nodes in
+             * Use the above id to make "possible" connections between the nodes in
              * this way
              */
             /* Hint1: It would be useful to remember what was the last node in this way. */
@@ -122,19 +122,19 @@ public class GraphBuildingHandler extends DefaultHandler {
              * connections and
              * remember whether this way is valid or not.
              */
-            long id = Long.parseLong(attributes.getValue("ref"));
-            ways.addLast(id);
-
+            long ref = Long.parseLong(attributes.getValue("ref"));
+            ways.addLast(ref);
         } else if (activeState.equals("way") && qName.equals("tag")) {
             /* While looking at a way, we found a <tag...> tag. */
             String k = attributes.getValue("k");
             String v = attributes.getValue("v");
-            if (k.equals("maxspeed")) {
-                // System.out.println("Max Speed: " + v);
-                /* TODO set the max speed of the "current way" here. */
-            } else if (k.equals("highway")) {
+            // if (k.equals("maxspeed")) {
+            // // System.out.println("Max Speed: " + v);
+            // /* set the max speed of the "current way" here. */
+            // } else if (k.equals("highway")) {
+            if (k.equals("highway")) {
                 // System.out.println("Highway type: " + v);
-                /* TODO Figure out whether this way and its connections are valid. */
+                /* Figure out whether this way and its connections are valid. */
                 /* Hint: Setting a "flag" is good enough! */
                 String wayType = v;
                 isWayValid = (ALLOWED_HIGHWAY_TYPES.contains(wayType)) ? true : false;
@@ -146,7 +146,7 @@ public class GraphBuildingHandler extends DefaultHandler {
         } else if (activeState.equals("node") && qName.equals("tag") && attributes.getValue("k")
                 .equals("name")) {
             /* While looking at a node, we found a <tag...> with k="name". */
-            /* TODO Create a location. */
+            /* Create a location. */
             /*
              * Hint: Since we found this <tag...> INSIDE a node, we should probably remember
              * which
@@ -156,7 +156,6 @@ public class GraphBuildingHandler extends DefaultHandler {
              */
             // System.out.println("Node's name: " + attributes.getValue("v"));
             name = attributes.getValue("v");
-            g.addLocation(name, id);
         }
     }
 
@@ -197,14 +196,21 @@ public class GraphBuildingHandler extends DefaultHandler {
                 }
                 g.addWay(name, vs);
             }
+        } else if (qName.equals("node")) {
+            g.addNode(id, name, lon, lat);
+            if (name.length() > 0) {
+                g.addLocation(name, id);
+            }
         }
 
+        // clear information after finish a node or way
         if (qName.equals("way") || qName.equals("node")) {
             id = -1;
             name = "";
+            lon = -1;
+            lat = -1;
             isWayValid = false;
             ways.clear();
         }
     }
-
 }
