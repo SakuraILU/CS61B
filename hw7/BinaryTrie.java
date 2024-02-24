@@ -6,10 +6,10 @@ import java.util.PriorityQueue;
 public class BinaryTrie implements Serializable {
 
     private class Node implements Comparable<Node>, Serializable {
-        public Character key;
-        public int weight;
-        public Node left;
-        public Node right;
+        private Character key;
+        private int weight;
+        private Node left;
+        private Node right;
 
         Node(Character key, int weight) {
             this(key, weight, null, null);
