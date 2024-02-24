@@ -19,19 +19,17 @@ public class Boggle {
     static String dictPath = "words.txt";
     private static Trie trieSet = new Trie();
 
-    private static String word = "";
+    private static String path = "";
+    private static PriorityQueue<String> words = new PriorityQueue<String>(new Comparator<String>() {
+        @Override
+        public int compare(String s1, String s2) {
+            if (s1.length() != s2.length()) {
+                return s1.length() - s2.length();
+            }
 
-    private static PriorityQueue<String> results = new PriorityQueue<String>(
-            new Comparator<String>() {
-                @Override
-                public int compare(String s1, String s2) {
-                    if (s1.length() != s2.length()) {
-                        return s1.length() - s2.length();
-                    }
-
-                    return s2.compareTo(s1);
-                }
-            });
+            return s2.compareTo(s1);
+        }
+    });
 
     // 定义所有可能的方向
     private static final Direction[] directions = new Direction[] {
@@ -56,7 +54,11 @@ public class Boggle {
      *         If multiple words have the same length,
      *         have them in ascending alphabetical order.
      */
-    public static List<String> solve(int k, String boardFilePath) {
+    public static List<String> solve(int k, String boardFilePath) throws IllegalArgumentException {
+        if (k <= 0) {
+            throw new IllegalArgumentException();
+        }
+
         buildTrie();
         char[][] board = readBoard(boardFilePath);
 
@@ -67,23 +69,27 @@ public class Boggle {
         }
 
         LinkedList<String> list = new LinkedList<String>();
-        while (results.size() > 0) {
-            String item = results.remove();
+        while (words.size() > 0) {
+            String item = words.remove();
             list.addFirst(item);
         }
 
         return list;
     }
 
-    private static void buildTrie() {
+    private static void buildTrie() throws IllegalArgumentException {
         In wordsIn = new In(dictPath);
+        if (!wordsIn.exists()) {
+            throw new IllegalArgumentException();
+        }
+
         while (wordsIn.hasNextLine()) {
             String word = wordsIn.readLine();
             trieSet.insert(word);
         }
     }
 
-    private static char[][] readBoard(String boardFilePath) {
+    private static char[][] readBoard(String boardFilePath) throws IllegalArgumentException {
         In boardIn = new In(boardFilePath);
         String[] lines = boardIn.readAllLines();
         marked = new boolean[lines.length][lines[0].length()];
@@ -91,6 +97,10 @@ public class Boggle {
         char[][] board = new char[lines.length][];
         for (int row = 0; row < lines.length; row++) {
             String line = lines[row];
+            if (line.length() != lines[0].length()) {
+                throw new IllegalArgumentException();
+            }
+
             board[row] = new char[line.length()];
             for (int col = 0; col < line.length(); col++) {
                 board[row][col] = line.charAt(col);
@@ -108,15 +118,15 @@ public class Boggle {
             return;
         }
         marked[i][j] = true;
-        word += board[i][j];
+        path += board[i][j];
 
-        if (trieSet.startWith(word)) {
-            if (trieSet.contains(word)) {
-                // add to results
-                if (!results.contains(word)) {
-                    results.add(word);
-                    if (results.size() > k) {
-                        results.remove();
+        if (trieSet.startWith(path)) {
+            if (path.length() > 2 && trieSet.contains(path)) {
+                // add to words
+                if (!words.contains(path)) {
+                    words.add(path);
+                    if (words.size() > k) {
+                        words.remove();
                     }
                 }
             }
@@ -128,7 +138,7 @@ public class Boggle {
             }
         }
 
-        word = word.substring(0, word.length() - 1);
+        path = path.substring(0, path.length() - 1);
         marked[i][j] = false;
 
         return;
