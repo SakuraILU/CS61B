@@ -1,7 +1,6 @@
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.io.IOException;
 
 public class HuffmanEncoder {
     public static Map<Character, Integer> buildFrequencyTable(char[] inputSymbols) {
@@ -18,7 +17,7 @@ public class HuffmanEncoder {
         return freqTable;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         String file = args[0];
         ObjectWriter ow = new ObjectWriter(file + ".huf");
 
