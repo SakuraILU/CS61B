@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "HuffmanEncoder",
+            "request": "launch",
+            "mainClass": "HuffmanEncoder",
+            "projectName": "hw7_f8d86cd4",
+            // "args": ["watermelonsugar.txt"]
+            "args": ["signalalarm.txt"]
+        },
+        {
+            "type": "java",
+            "name": "HuffmanDecoder",
+            "request": "launch",
+            "mainClass": "HuffmanDecoder",
+            "projectName": "hw7_f8d86cd4",
+            // "args": ["watermelonsugar.txt.huf", "watermelonsugaroriginal.txt"]
+            "args": ["signalalarm.txt.huf", "signalalarmorigin.txt"]
+        }
+    ]
+}
