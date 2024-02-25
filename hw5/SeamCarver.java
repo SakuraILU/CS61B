@@ -2,7 +2,7 @@ import edu.princeton.cs.algs4.Picture;
 import java.awt.Color;
 
 public class SeamCarver {
-    Picture picture;
+    private Picture picture;
 
     public SeamCarver(Picture picture) {
         this.picture = picture;
@@ -10,7 +10,7 @@ public class SeamCarver {
 
     // current picture
     public Picture picture() {
-        return picture;
+        return new Picture(picture);
     }
 
     // width of current picture
@@ -103,7 +103,7 @@ public class SeamCarver {
 
     // remove horizontal seam from picture
     public void removeHorizontalSeam(int[] seam) {
-        picture = SeamRemover.removeVerticalSeam(picture, seam);
+        picture = SeamRemover.removeHorizontalSeam(picture, seam);
     }
 
     // remove vertical seam from picture
