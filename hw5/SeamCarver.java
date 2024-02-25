@@ -5,11 +5,13 @@ public class SeamCarver {
     private Picture picture;
 
     public SeamCarver(Picture picture) {
-        this.picture = picture;
+        // make sure picture is unchangable by the client after creating SeamCarver.
+        this.picture = new Picture(picture);
     }
 
     // current picture
     public Picture picture() {
+        // make sure picture is unchangable by the client.
         return new Picture(picture);
     }
 
