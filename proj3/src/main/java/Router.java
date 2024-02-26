@@ -1,10 +1,8 @@
 import java.util.Objects;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,24 +42,11 @@ public class Router {
         distTo.put(s, 0.0);
         preNode.put(s, null);
 
-        PriorityQueue<Long> toVisit = new PriorityQueue<Long>(new Comparator<Long>() {
-            public int compare(Long node1, Long node2) {
-                double h1 = distTo.get(node1) + g.distance(node1, t);
-                double h2 = distTo.get(node2) + g.distance(node2, t);
+        ArrayHeap<Long> toVisit = new ArrayHeap<>();
 
-                if (h1 < h2) {
-                    return -1;
-                } else if (h1 == h2) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            }
-        });
-
-        toVisit.add(s);
+        toVisit.insert(s, distTo.get(s) + g.distance(s, t));
         while (!toVisit.isEmpty()) {
-            long node = toVisit.remove();
+            long node = toVisit.removeMin();
             if (node == t) {
                 break;
             }
@@ -74,8 +59,7 @@ public class Router {
                     distTo.put(neighbor, distTo.get(node) + weight);
                     preNode.put(neighbor, node);
 
-                    toVisit.remove(neighbor);
-                    toVisit.add(neighbor);
+                    toVisit.changePriority(neighbor, distTo.get(neighbor) + g.distance(neighbor, t));
                 }
             }
         }

@@ -30,8 +30,8 @@ public class TrieMap<T> {
         if (i == key.length()) {
             if (node.value == null) {
                 size++;
-            }
-            node.value = value;
+            	node.value = value;
+	    }
             return;
         }
 
