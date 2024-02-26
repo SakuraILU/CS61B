@@ -54,12 +54,13 @@ public class Router {
             for (GraphDB.Edge e : g.adjEdges(node)) {
                 long neighbor = e.to();
                 double weight = e.weight();
-                if (!distTo.containsKey(neighbor) ||
-                        distTo.get(node) + weight < distTo.get(neighbor)) {
+                if (!distTo.containsKey(neighbor)
+                        || distTo.get(node) + weight < distTo.get(neighbor)) {
                     distTo.put(neighbor, distTo.get(node) + weight);
                     preNode.put(neighbor, node);
 
-                    toVisit.changePriority(neighbor, distTo.get(neighbor) + g.distance(neighbor, t));
+                    toVisit.changePriority(
+                            neighbor, distTo.get(neighbor) + g.distance(neighbor, t));
                 }
             }
         }

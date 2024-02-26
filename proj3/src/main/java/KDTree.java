@@ -17,19 +17,16 @@ public class KDTree {
         }
 
         /**
-         * distance to the axis.
-         * Lower approximation! Here, we treat the earth as a plane
-         * Lower approximation of Axis distance is ok for kdtree,
-         * because we are likely to expore more bad side than acurate approximation, no
-         * space needed to explored is missed.
-         * However, on the other hand, if upper approximation of Axis distance functions
-         * right, we may ignore some good side!
+         * Distance to the axis.
+         * Parallel to x-axis if isLon, parallel to y-axis if isLat (isLon is false).
+         * Small error in the distance is fine,
+         * Because the nearest point will not leaved too far in our workloads.
          */
         public double distanceAxis(Point p) {
             if (isLon) {
-                return this.lon - p.lon;
+                return GraphDB.distance(lon, p.lat, p.lon, p.lat);
             } else {
-                return this.lat - p.lat;
+                return GraphDB.distance(p.lon, lat, p.lon, p.lat);
             }
         }
 
@@ -43,9 +40,9 @@ public class KDTree {
     }
 
     private class Node {
-        public Point point;
-        public Node left;
-        public Node right;
+        private Point point;
+        private Node left;
+        private Node right;
 
         Node(Point point) {
             this.point = point;

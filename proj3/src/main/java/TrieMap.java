@@ -5,8 +5,8 @@ import java.util.HashSet;
 
 public class TrieMap<T> {
     private class Node {
-        public T value;
-        public Map<Character, Node> children;
+        private T value;
+        private Map<Character, Node> children;
 
         Node() {
             children = new HashMap<>();
@@ -30,8 +30,8 @@ public class TrieMap<T> {
         if (i == key.length()) {
             if (node.value == null) {
                 size++;
-            	node.value = value;
-	    }
+                node.value = value;
+            }
             return;
         }
 

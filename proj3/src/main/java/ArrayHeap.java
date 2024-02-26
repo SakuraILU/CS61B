@@ -31,7 +31,6 @@ public class ArrayHeap<T> {
      * Returns the index of the node to the left of the node at i.
      */
     private static int leftIndex(int i) {
-        /* TODO: Your code here! */
         return 2 * i;
     }
 
@@ -39,7 +38,6 @@ public class ArrayHeap<T> {
      * Returns the index of the node to the right of the node at i.
      */
     private static int rightIndex(int i) {
-        /* TODO: Your code here! */
         return 2 * i + 1;
     }
 
@@ -47,7 +45,6 @@ public class ArrayHeap<T> {
      * Returns the index of the node that is the parent of the node at i.
      */
     private static int parentIndex(int i) {
-        /* TODO: Your code here! */
         return i / 2;
     }
 
@@ -117,7 +114,6 @@ public class ArrayHeap<T> {
             return;
         }
 
-        /** TODO: Your code here. */
         int parentIndex = parentIndex(index);
         int smallestIndex = min(index, parentIndex);
         if (smallestIndex == index) {
@@ -142,7 +138,6 @@ public class ArrayHeap<T> {
             return;
         }
 
-        /** TODO: Your code here. */
         int leftChildIndex = leftIndex(index);
         int rightChildIndex = rightIndex(index);
         int smallestChildIndex = min(leftChildIndex, rightChildIndex);
@@ -165,7 +160,6 @@ public class ArrayHeap<T> {
             resize(contents.length * 2);
         }
 
-        /* TODO: Your code here! */
         size++;
         Node node = new Node(item, priority);
         contents[size] = node;
@@ -179,7 +173,6 @@ public class ArrayHeap<T> {
      * ArrayList.
      */
     public T peek() {
-        /* TODO: Your code here! */
         return contents[1].myItem;
     }
 
@@ -193,7 +186,6 @@ public class ArrayHeap<T> {
      * item.
      */
     public T removeMin() {
-        /* TODO: Your code here! */
         if (size < 1) {
             return null;
         } else if (size == 1) {
@@ -230,7 +222,6 @@ public class ArrayHeap<T> {
      * and think about the algorithm before you start to code.
      */
     public void changePriority(T item, double priority) {
-        /* TODO: Your code here! */
         for (int i = 1; i <= size; i++) {
             if (contents[i].myItem.equals(item)) {
                 double prevPriority = contents[i].myPriority;
@@ -283,13 +274,16 @@ public class ArrayHeap<T> {
      */
     private void validateSinkSwimArg(int index) {
         if (index < 1) {
-            throw new IllegalArgumentException("Cannot sink or swim nodes with index 0 or less");
+            throw new IllegalArgumentException(
+                    "Cannot sink or swim nodes with index 0 or less");
         }
         if (index > size) {
-            throw new IllegalArgumentException("Cannot sink or swim nodes with index greater than current size.");
+            throw new IllegalArgumentException(
+                    "Cannot sink or swim nodes with index greater than current size.");
         }
         if (contents[index] == null) {
-            throw new IllegalArgumentException("Cannot sink or swim a null node.");
+            throw new IllegalArgumentException(
+                    "Cannot sink or swim a null node.");
         }
     }
 
